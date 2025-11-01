@@ -13,6 +13,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const Home = () => {
@@ -20,8 +21,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden pt-16 md:pt-20 mt-4">
         <div className="absolute inset-0 bg-gradient-hero opacity-10"></div>
         <div className="container mx-auto px-4 py-20 md:py-32 relative">
           <div className="max-w-3xl mx-auto text-center animate-fade-in-up">
@@ -49,7 +51,10 @@ const Home = () => {
           </div>
 
           {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 mt-20 max-w-5xl mx-auto">
+          <div
+            id="features"
+            className="grid md:grid-cols-3 gap-6 mt-20 max-w-5xl mx-auto"
+          >
             <Card className="border-none shadow-soft hover:shadow-colored transition-all duration-300 hover:-translate-y-1">
               <CardHeader>
                 <Users className="w-10 h-10 text-primary mb-4" />
@@ -85,7 +90,7 @@ const Home = () => {
       </div>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-muted/30">
+      <section id="how-it-works" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">How It Works</h2>
