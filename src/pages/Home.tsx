@@ -48,7 +48,7 @@ const Home = () => {
                   "Coming Soon!",
                   "Dashboard feature is under development"
                 );
-                // navigate("/dashboard");
+                navigate("/dashboard");
               }}
               className="shadow-colored hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
