@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    /* ===== Semantic Colors (shadcn/ui compatibility) ===== */
     --background: 210 40% 98%;
     --foreground: 215 25% 15%;
 
@@ -34,23 +35,196 @@
 
     --radius: 0.75rem;
 
-    /* Custom design tokens */
+    /* ===== Color Scales (50-950) ===== */
+
+    /* Cyan/Teal - Primary Brand Color */
+    --cyan-50: 180 100% 97%;
+    --cyan-100: 180 84% 92%;
+    --cyan-200: 180 77% 84%;
+    --cyan-300: 180 71% 73%;
+    --cyan-400: 182 72% 59%;
+    --cyan-500: 182 70% 45%;
+    --cyan-600: 182 78% 36%;
+    --cyan-700: 182 85% 29%;
+    --cyan-800: 182 87% 24%;
+    --cyan-900: 182 84% 20%;
+    --cyan-950: 182 100% 12%;
+
+    /* Blue - Secondary Brand Color */
+    --blue-50: 220 100% 97%;
+    --blue-100: 220 95% 94%;
+    --blue-200: 220 91% 87%;
+    --blue-300: 220 87% 77%;
+    --blue-400: 220 75% 65%;
+    --blue-500: 220 60% 50%;
+    --blue-600: 220 70% 42%;
+    --blue-700: 220 75% 35%;
+    --blue-800: 220 80% 28%;
+    --blue-900: 220 82% 23%;
+    --blue-950: 220 90% 15%;
+
+    /* Orange - Accent Color */
+    --orange-50: 15 100% 97%;
+    --orange-100: 15 100% 93%;
+    --orange-200: 15 100% 85%;
+    --orange-300: 15 95% 75%;
+    --orange-400: 15 90% 68%;
+    --orange-500: 15 85% 62%;
+    --orange-600: 15 75% 52%;
+    --orange-700: 15 70% 44%;
+    --orange-800: 15 65% 36%;
+    --orange-900: 15 60% 30%;
+    --orange-950: 15 80% 18%;
+
+    /* Slate/Gray - Neutral Colors */
+    --slate-50: 210 40% 98%;
+    --slate-100: 210 40% 96%;
+    --slate-200: 214 32% 91%;
+    --slate-300: 213 27% 84%;
+    --slate-400: 215 20% 65%;
+    --slate-500: 215 16% 47%;
+    --slate-600: 215 19% 35%;
+    --slate-700: 215 25% 27%;
+    --slate-800: 217 33% 17%;
+    --slate-900: 215 28% 10%;
+    --slate-950: 220 40% 5%;
+
+    /* Red - Error/Destructive */
+    --red-50: 0 86% 97%;
+    --red-100: 0 93% 94%;
+    --red-200: 0 96% 89%;
+    --red-300: 0 94% 82%;
+    --red-400: 0 91% 71%;
+    --red-500: 0 72% 51%;
+    --red-600: 0 78% 45%;
+    --red-700: 0 80% 38%;
+    --red-800: 0 75% 32%;
+    --red-900: 0 70% 27%;
+    --red-950: 0 85% 15%;
+
+    /* Green - Success */
+    --green-50: 138 76% 97%;
+    --green-100: 140 84% 93%;
+    --green-200: 141 79% 85%;
+    --green-300: 142 77% 73%;
+    --green-400: 142 69% 58%;
+    --green-500: 142 71% 45%;
+    --green-600: 142 76% 36%;
+    --green-700: 142 72% 29%;
+    --green-800: 143 64% 24%;
+    --green-900: 144 61% 20%;
+    --green-950: 145 80% 11%;
+
+    /* Yellow - Warning */
+    --yellow-50: 48 100% 96%;
+    --yellow-100: 48 96% 89%;
+    --yellow-200: 48 97% 77%;
+    --yellow-300: 46 97% 65%;
+    --yellow-400: 43 96% 56%;
+    --yellow-500: 38 92% 50%;
+    --yellow-600: 32 95% 44%;
+    --yellow-700: 26 90% 37%;
+    --yellow-800: 23 83% 31%;
+    --yellow-900: 22 78% 26%;
+    --yellow-950: 21 92% 14%;
+
+    /* Purple - Optional */
+    --purple-50: 270 100% 98%;
+    --purple-100: 269 100% 95%;
+    --purple-200: 269 100% 92%;
+    --purple-300: 269 97% 85%;
+    --purple-400: 270 95% 75%;
+    --purple-500: 270 91% 65%;
+    --purple-600: 270 70% 50%;
+    --purple-700: 270 75% 42%;
+    --purple-800: 270 80% 35%;
+    --purple-900: 270 85% 28%;
+    --purple-950: 270 100% 18%;
+
+    /* ===== Typography Scale ===== */
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'Fira Code', 'JetBrains Mono', Consolas, Monaco, 'Courier New', monospace;
+    --font-display: 'Inter', sans-serif;
+
+    /* Font Sizes */
+    --text-xs: 0.75rem;      /* 12px */
+    --text-sm: 0.875rem;     /* 14px */
+    --text-base: 1rem;       /* 16px */
+    --text-lg: 1.125rem;     /* 18px */
+    --text-xl: 1.25rem;      /* 20px */
+    --text-2xl: 1.5rem;      /* 24px */
+    --text-3xl: 1.875rem;    /* 30px */
+    --text-4xl: 2.25rem;     /* 36px */
+    --text-5xl: 3rem;        /* 48px */
+    --text-6xl: 3.75rem;     /* 60px */
+    --text-7xl: 4.5rem;      /* 72px */
+
+    /* Line Heights */
+    --leading-none: 1;
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+    --leading-loose: 2;
+
+    /* Font Weights */
+    --font-thin: 100;
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extrabold: 800;
+    --font-black: 900;
+
+    /* ===== Spacing Scale ===== */
+    --space-xs: 0.25rem;     /* 4px */
+    --space-sm: 0.5rem;      /* 8px */
+    --space-md: 1rem;        /* 16px */
+    --space-lg: 1.5rem;      /* 24px */
+    --space-xl: 2rem;        /* 32px */
+    --space-2xl: 3rem;       /* 48px */
+    --space-3xl: 4rem;       /* 64px */
+    --space-4xl: 6rem;       /* 96px */
+
+    /* ===== Custom Design Tokens ===== */
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(182 70% 45%),
-      hsl(220 60% 50%)
+      hsl(var(--cyan-500)),
+      hsl(var(--blue-500))
     );
     --gradient-hero: linear-gradient(
       135deg,
-      hsl(182 70% 45%) 0%,
-      hsl(220 60% 50%) 100%
+      hsl(var(--cyan-500)) 0%,
+      hsl(var(--blue-500)) 100%
     );
-    --shadow-colored: 0 10px 40px -10px hsl(182 70% 45% / 0.3);
-    --shadow-soft: 0 4px 20px -4px hsl(215 25% 15% / 0.1);
+    --gradient-warm: linear-gradient(
+      135deg,
+      hsl(var(--orange-400)),
+      hsl(var(--orange-600))
+    );
+    --gradient-success: linear-gradient(
+      135deg,
+      hsl(var(--green-400)),
+      hsl(var(--green-600))
+    );
+
+    --shadow-xs: 0 1px 2px 0 hsl(var(--slate-900) / 0.05);
+    --shadow-sm: 0 1px 3px 0 hsl(var(--slate-900) / 0.1), 0 1px 2px -1px hsl(var(--slate-900) / 0.1);
+    --shadow-md: 0 4px 6px -1px hsl(var(--slate-900) / 0.1), 0 2px 4px -2px hsl(var(--slate-900) / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(var(--slate-900) / 0.1), 0 4px 6px -4px hsl(var(--slate-900) / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(var(--slate-900) / 0.1), 0 8px 10px -6px hsl(var(--slate-900) / 0.1);
+    --shadow-2xl: 0 25px 50px -12px hsl(var(--slate-900) / 0.25);
+    --shadow-colored: 0 10px 40px -10px hsl(var(--cyan-500) / 0.3);
+    --shadow-soft: 0 4px 20px -4px hsl(var(--slate-800) / 0.1);
+
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
+    /* ===== Semantic Colors (Dark Mode) ===== */
     --background: 215 28% 10%;
     --foreground: 210 30% 96%;
 
@@ -79,25 +253,164 @@
     --input: 215 20% 22%;
     --ring: 182 65% 55%;
 
+    /* ===== Color Scales (Dark Mode Optimized) ===== */
+
+    /* Cyan/Teal - Lighter for dark backgrounds */
+    --cyan-50: 182 100% 12%;
+    --cyan-100: 182 84% 20%;
+    --cyan-200: 182 87% 24%;
+    --cyan-300: 182 85% 29%;
+    --cyan-400: 182 78% 36%;
+    --cyan-500: 182 65% 55%;
+    --cyan-600: 182 72% 59%;
+    --cyan-700: 180 71% 73%;
+    --cyan-800: 180 77% 84%;
+    --cyan-900: 180 84% 92%;
+    --cyan-950: 180 100% 97%;
+
+    /* Blue - Lighter for dark backgrounds */
+    --blue-50: 220 90% 15%;
+    --blue-100: 220 82% 23%;
+    --blue-200: 220 80% 28%;
+    --blue-300: 220 75% 35%;
+    --blue-400: 220 70% 42%;
+    --blue-500: 220 55% 60%;
+    --blue-600: 220 75% 65%;
+    --blue-700: 220 87% 77%;
+    --blue-800: 220 91% 87%;
+    --blue-900: 220 95% 94%;
+    --blue-950: 220 100% 97%;
+
+    /* Orange - Adjusted for dark mode */
+    --orange-50: 15 80% 18%;
+    --orange-100: 15 60% 30%;
+    --orange-200: 15 65% 36%;
+    --orange-300: 15 70% 44%;
+    --orange-400: 15 75% 52%;
+    --orange-500: 15 80% 65%;
+    --orange-600: 15 90% 68%;
+    --orange-700: 15 95% 75%;
+    --orange-800: 15 100% 85%;
+    --orange-900: 15 100% 93%;
+    --orange-950: 15 100% 97%;
+
+    /* Slate/Gray - Inverted for dark mode */
+    --slate-50: 220 40% 5%;
+    --slate-100: 215 28% 10%;
+    --slate-200: 217 33% 17%;
+    --slate-300: 215 25% 27%;
+    --slate-400: 215 19% 35%;
+    --slate-500: 215 16% 47%;
+    --slate-600: 215 20% 65%;
+    --slate-700: 213 27% 84%;
+    --slate-800: 214 32% 91%;
+    --slate-900: 210 40% 96%;
+    --slate-950: 210 40% 98%;
+
+    /* Red - Error/Destructive for dark mode */
+    --red-50: 0 85% 15%;
+    --red-100: 0 70% 27%;
+    --red-200: 0 75% 32%;
+    --red-300: 0 80% 38%;
+    --red-400: 0 78% 45%;
+    --red-500: 0 65% 55%;
+    --red-600: 0 91% 71%;
+    --red-700: 0 94% 82%;
+    --red-800: 0 96% 89%;
+    --red-900: 0 93% 94%;
+    --red-950: 0 86% 97%;
+
+    /* Green - Success for dark mode */
+    --green-50: 145 80% 11%;
+    --green-100: 144 61% 20%;
+    --green-200: 143 64% 24%;
+    --green-300: 142 72% 29%;
+    --green-400: 142 76% 36%;
+    --green-500: 142 71% 45%;
+    --green-600: 142 69% 58%;
+    --green-700: 142 77% 73%;
+    --green-800: 141 79% 85%;
+    --green-900: 140 84% 93%;
+    --green-950: 138 76% 97%;
+
+    /* Yellow - Warning for dark mode */
+    --yellow-50: 21 92% 14%;
+    --yellow-100: 22 78% 26%;
+    --yellow-200: 23 83% 31%;
+    --yellow-300: 26 90% 37%;
+    --yellow-400: 32 95% 44%;
+    --yellow-500: 38 92% 50%;
+    --yellow-600: 43 96% 56%;
+    --yellow-700: 46 97% 65%;
+    --yellow-800: 48 97% 77%;
+    --yellow-900: 48 96% 89%;
+    --yellow-950: 48 100% 96%;
+
+    /* Purple - Optional for dark mode */
+    --purple-50: 270 100% 18%;
+    --purple-100: 270 85% 28%;
+    --purple-200: 270 80% 35%;
+    --purple-300: 270 75% 42%;
+    --purple-400: 270 70% 50%;
+    --purple-500: 270 91% 65%;
+    --purple-600: 270 95% 75%;
+    --purple-700: 269 97% 85%;
+    --purple-800: 269 100% 92%;
+    --purple-900: 269 100% 95%;
+    --purple-950: 270 100% 98%;
+
+    /* ===== Custom Design Tokens (Dark Mode) ===== */
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(182 65% 55%),
-      hsl(220 55% 60%)
+      hsl(var(--cyan-500)),
+      hsl(var(--blue-500))
     );
     --gradient-hero: linear-gradient(
       135deg,
-      hsl(182 65% 55%) 0%,
-      hsl(220 55% 60%) 100%
+      hsl(var(--cyan-500)) 0%,
+      hsl(var(--blue-500)) 100%
     );
-    --shadow-colored: 0 10px 40px -10px hsl(182 65% 55% / 0.4);
+    --gradient-warm: linear-gradient(
+      135deg,
+      hsl(var(--orange-400)),
+      hsl(var(--orange-600))
+    );
+    --gradient-success: linear-gradient(
+      135deg,
+      hsl(var(--green-400)),
+      hsl(var(--green-600))
+    );
+
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.1);
+    --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.2), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.3), 0 8px 10px -6px hsl(0 0% 0% / 0.3);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.4);
+    --shadow-colored: 0 10px 40px -10px hsl(var(--cyan-500) / 0.4);
     --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
   }
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  /* Typography Utilities */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+  }
+
+  code, pre, kbd {
+    font-family: var(--font-mono);
   }
 }
