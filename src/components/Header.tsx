@@ -1,19 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Moon, Sun, Receipt } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setIsDarkMode(isDark);
-  }, []);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,16 +21,7 @@ const Header = () => {
   }, []);
 
   const toggleDarkMode = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-
-    if (newMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const handleNavClick = (path: string) => {
@@ -95,7 +82,7 @@ const Header = () => {
               className="p-2 rounded-lg hover:bg-muted transition-colors"
               aria-label="Toggle dark mode"
             >
-              {isDarkMode ? (
+              {theme === "dark" ? (
                 <Sun className="w-5 h-5 text-foreground" />
               ) : (
                 <Moon className="w-5 h-5 text-foreground" />
@@ -107,7 +94,7 @@ const Header = () => {
               onClick={() => navigate("/login")}
               className="font-medium"
             >
-              Log In
+              Sign In
             </Button>
 
             <Button
@@ -124,7 +111,7 @@ const Header = () => {
               className="p-2 rounded-lg hover:bg-muted transition-colors"
               aria-label="Toggle dark mode"
             >
-              {isDarkMode ? (
+              {theme === "dark" ? (
                 <Sun className="w-5 h-5 text-foreground" />
               ) : (
                 <Moon className="w-5 h-5 text-foreground" />
