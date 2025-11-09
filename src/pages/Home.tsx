@@ -16,9 +16,19 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "@/lib/toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useState, useEffect } from "react";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
