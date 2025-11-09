@@ -13,6 +13,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "@/lib/toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -42,7 +43,13 @@ const Home = () => {
             </p>
             <Button
               size="lg"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => {
+                toast.info(
+                  "Coming Soon!",
+                  "Dashboard feature is under development"
+                );
+                navigate("/dashboard");
+              }}
               className="shadow-colored hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
               Get Started
@@ -145,7 +152,13 @@ const Home = () => {
             <Button
               size="lg"
               variant="secondary"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => {
+                toast.success(
+                  "Welcome!",
+                  "Let's start splitting expenses together"
+                );
+                // navigate("/dashboard");
+              }}
               className="shadow-soft"
             >
               Get Started Free
