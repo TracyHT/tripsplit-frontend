@@ -17,10 +17,10 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
-      authApi.login(email, password),
-    onSuccess: (data) => {
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
+      authApi.login({ email, password }),
+    onSuccess: (response) => {
+      if (response.data.token) {
+        localStorage.setItem("authToken", response.data.token);
       }
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
@@ -39,10 +39,10 @@ export function useRegister() {
       email: string;
       password: string;
       name: string;
-    }) => authApi.register(email, password, name),
-    onSuccess: (data) => {
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
+    }) => authApi.register({ email, password, name }),
+    onSuccess: (response) => {
+      if (response.data.token) {
+        localStorage.setItem("authToken", response.data.token);
       }
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },

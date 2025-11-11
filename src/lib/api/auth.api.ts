@@ -3,19 +3,15 @@ import { apiClient, API_BASE_URL } from "./client";
 // ============ Auth API ============
 export const authApi = {
   // Register with email/password
-  register: async (email: string, password: string, name: string) => {
-    const response = await apiClient.post("/auth/register", {
-      email,
-      password,
-      name,
-    });
-    return response.data;
+  register: async (data: { email: string; password: string; name: string }) => {
+    const response = await apiClient.post("/auth/register", data);
+    return response;
   },
 
   // Login with email/password
-  login: async (email: string, password: string) => {
-    const response = await apiClient.post("/auth/login", { email, password });
-    return response.data;
+  login: async (data: { email: string; password: string }) => {
+    const response = await apiClient.post("/auth/login", data);
+    return response;
   },
 
   // Logout

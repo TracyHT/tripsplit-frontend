@@ -6,6 +6,11 @@ import { Toaster } from "@/components/ui/sonner";
 import Home from "./pages/Home";
 import ApiTest from "./pages/ApiTest";
 import ApiTestDashboard from "./pages/ApiTestDashboard";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import OAuthCallback from "./pages/OAuthCallback";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -15,6 +20,17 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/profile" element={<OAuthCallback />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/api-test" element={<ApiTest />} />
           <Route path="/test" element={<ApiTestDashboard />} />
         </Routes>
