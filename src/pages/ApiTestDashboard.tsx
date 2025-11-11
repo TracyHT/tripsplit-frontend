@@ -48,19 +48,25 @@ export default function ApiTestDashboard() {
   // Auth Tests
   const testRegister = () =>
     runTest("register", "POST /auth/register", () =>
-      authApi.register(
-        `test${Date.now()}@example.com`,
-        "password123",
-        "Test User"
-      )
+      authApi.register({
+        email: `test${Date.now()}@example.com`,
+        password: "password123",
+        name: "Test User"
+      })
     );
 
   const testLogin = async () => {
-    const data = await runTest("login", "POST /auth/login", () =>
-      authApi.login("test@example.com", "password123")
+    const response = await runTest("login", "POST /auth/login", () =>
+      authApi.login({
+        email: "test@example.com",
+        password: "password123"
+      })
     );
-    if (data.user) setCurrentUser(data.user);
-    if (data.token) localStorage.setItem("authToken", data.token);
+    if (response?.data) {
+      const data = response.data;
+      if (data.name) setCurrentUser(data);
+      if (data.token) localStorage.setItem("authToken", data.token);
+    }
   };
 
   const testLogout = () =>

@@ -30,13 +30,18 @@ export default function ApiTest() {
     setStatus("Testing registration...");
 
     try {
-      const result = await authApi.register(
-        "test@example.com",
-        "password123",
-        "Test User"
-      );
+      const result = await authApi.register({
+        email: "test@example.com",
+        password: "password123",
+        name: "Test User"
+      });
       setStatus("Registration successful!");
-      setResponse(result);
+      setResponse(result.data);
+
+      // Store token if provided
+      if (result.data.token) {
+        localStorage.setItem("authToken", result.data.token);
+      }
     } catch (error: any) {
       setStatus(`Registration failed: ${error.message}`);
       setResponse(error.response?.data || error.message);
@@ -50,13 +55,16 @@ export default function ApiTest() {
     setStatus("Testing login...");
 
     try {
-      const result = await authApi.login("test@example.com", "password123");
+      const result = await authApi.login({
+        email: "test@example.com",
+        password: "password123"
+      });
       setStatus("Login successful!");
-      setResponse(result);
+      setResponse(result.data);
 
       // Store token if provided
-      if (result.token) {
-        localStorage.setItem("authToken", result.token);
+      if (result.data.token) {
+        localStorage.setItem("authToken", result.data.token);
       }
     } catch (error: any) {
       setStatus(`Login failed: ${error.message}`);
