@@ -2,14 +2,17 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Moon, Sun, Receipt } from "lucide-react";
+import { Menu, X, Moon, Sun, Receipt, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/lib/toast";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { isAuthenticated, user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,6 +30,17 @@ const Header = () => {
   const handleNavClick = (path: string) => {
     navigate(path);
     setIsMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      navigate('/');
+      setIsMenuOpen(false);
+    } catch (error) {
+      toast.error('Failed to logout');
+    }
   };
 
   const navLinks = [
@@ -89,20 +103,47 @@ const Header = () => {
               )}
             </button>
 
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/login")}
-              className="font-medium"
-            >
-              Sign In
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/dashboard")}
+                  className="font-medium"
+                >
+                  Dashboard
+                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {user?.name || user?.email}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleLogout}
+                    className="hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/login")}
+                  className="font-medium"
+                >
+                  Sign In
+                </Button>
 
-            <Button
-              onClick={() => navigate("/signup")}
-              className="shadow-md hover:shadow-lg transition-all"
-            >
-              Get Started
-            </Button>
+                <Button
+                  onClick={() => navigate("/signup")}
+                  className="shadow-md hover:shadow-lg transition-all"
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           <div className="flex md:hidden items-center gap-2">
@@ -151,20 +192,45 @@ const Header = () => {
             ))}
 
             <div className="pt-4 space-y-2 border-t border-border mt-4">
-              <Button
-                variant="ghost"
-                onClick={() => handleNavClick("/login")}
-                className="w-full justify-start font-medium"
-              >
-                Log In
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <div className="px-4 py-2 text-sm text-muted-foreground">
+                    {user?.name || user?.email}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleNavClick("/dashboard")}
+                    className="w-full justify-start font-medium"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    className="w-full justify-start font-medium text-destructive hover:text-destructive"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Log Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleNavClick("/login")}
+                    className="w-full justify-start font-medium"
+                  >
+                    Log In
+                  </Button>
 
-              <Button
-                onClick={() => handleNavClick("/signup")}
-                className="w-full shadow-md"
-              >
-                Get Started
-              </Button>
+                  <Button
+                    onClick={() => handleNavClick("/signup")}
+                    className="w-full shadow-md"
+                  >
+                    Get Started
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
