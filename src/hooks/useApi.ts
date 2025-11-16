@@ -7,7 +7,10 @@ import type { User, Group } from "@/types/api";
 export function useCurrentUser() {
   return useQuery<User>({
     queryKey: ["currentUser"],
-    queryFn: authApi.getCurrentUser,
+    queryFn: async () => {
+      const response = await authApi.getCurrentUser();
+      return response.data;
+    },
     retry: false,
   });
 }
