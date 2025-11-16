@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '@/lib/api';
 import type { User } from '@/types/api';
 
@@ -16,87 +16,148 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const TOKEN_KEY = 'authToken';
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Check if user is logged in on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        try {
-          const response = await authApi.getCurrentUser();
-          setUser(response.data);
-        } catch (error) {
-          // Token is invalid, clear it
-          localStorage.removeItem('authToken');
-        }
+  const fetchCurrentUser = useCallback(async (): Promise<User> => {
+    try {
+      const response = await authApi.getCurrentUser();
+      const userData = response.data?.data || response.data;
+
+      if (!userData || !userData._id) {
+        throw new Error('Invalid user data received');
       }
-      setIsLoading(false);
-    };
 
-    checkAuth();
+      return userData;
+    } catch (error) {
+      localStorage.removeItem(TOKEN_KEY);
+      throw error;
+    }
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const response = await authApi.login({ email, password });
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const token = localStorage.getItem(TOKEN_KEY);
 
-    // Backend returns user data with token in the response
-    if (response.data.token) {
-      localStorage.setItem('authToken', response.data.token);
-      // Set user data (excluding token)
-      const { token, ...userData } = response.data;
+      if (token) {
+        try {
+          const userData = await fetchCurrentUser();
+          if (userData) {
+            setUser(userData);
+          }
+        } catch (error) {
+          setUser(null);
+        }
+      }
+
+      setIsLoading(false);
+      setIsInitialized(true);
+    };
+
+    initializeAuth();
+  }, [fetchCurrentUser]);
+
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await authApi.login({ email, password });
+      const data = response.data;
+
+      if (!data.token) {
+        throw new Error('No token received from server');
+      }
+
+      localStorage.setItem(TOKEN_KEY, data.token);
+      const { token, ...userData } = data;
+
+      if (!userData._id || !userData.email) {
+        throw new Error('Invalid user data received');
+      }
+
       setUser(userData as User);
+    } catch (error) {
+      localStorage.removeItem(TOKEN_KEY);
+      setUser(null);
+      throw error;
     }
   };
 
   const register = async (email: string, password: string, name: string) => {
-    const response = await authApi.register({ email, password, name });
+    try {
+      const response = await authApi.register({ email, password, name });
+      const data = response.data;
 
-    // Backend returns user data with token
-    if (response.data.token) {
-      localStorage.setItem('authToken', response.data.token);
-      const { token, ...userData } = response.data;
+      if (!data.token) {
+        throw new Error('No token received from server');
+      }
+
+      localStorage.setItem(TOKEN_KEY, data.token);
+      const { token, ...userData } = data;
+
+      if (!userData._id || !userData.email) {
+        throw new Error('Invalid user data received');
+      }
+
       setUser(userData as User);
+    } catch (error) {
+      localStorage.removeItem(TOKEN_KEY);
+      setUser(null);
+      throw error;
     }
   };
 
   const logout = async () => {
-    try {
-      await authApi.logout();
-    } catch (error) {
-      // Even if logout fails on server, clear local state
-      console.error('Logout error:', error);
-    } finally {
-      localStorage.removeItem('authToken');
-      setUser(null);
-    }
+    localStorage.removeItem(TOKEN_KEY);
+    setUser(null);
   };
 
   const refreshUser = async () => {
-    const response = await authApi.getCurrentUser();
-    setUser(response.data);
-  };
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) {
+      throw new Error('No token available');
+    }
 
-  // Google OAuth - redirect to backend OAuth endpoint
-  const loginWithGoogle = () => {
-    // Backend will handle OAuth flow and redirect back to /profile?token=...
-    window.location.href = `${import.meta.env.VITE_API_URL.replace('/api', '')}/api/auth/google`;
-  };
-
-  // Handle OAuth callback when redirected back from backend
-  const handleOAuthCallback = async (token: string) => {
-    localStorage.setItem('authToken', token);
     try {
-      const response = await authApi.getCurrentUser();
-      setUser(response.data);
+      const userData = await fetchCurrentUser();
+      setUser(userData);
     } catch (error) {
-      console.error('Failed to fetch user after OAuth:', error);
-      localStorage.removeItem('authToken');
+      setUser(null);
       throw error;
     }
   };
+
+  const loginWithGoogle = () => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+    window.location.href = `${apiUrl.replace('/api', '')}/api/auth/google`;
+  };
+
+  const handleOAuthCallback = async (token: string) => {
+    localStorage.setItem(TOKEN_KEY, token);
+
+    try {
+      const userData = await fetchCurrentUser();
+      if (userData) {
+        setUser(userData);
+      }
+    } catch (error) {
+      localStorage.removeItem(TOKEN_KEY);
+      throw error;
+    }
+  };
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 animate-spin mx-auto rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-muted-foreground">Initializing...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider
