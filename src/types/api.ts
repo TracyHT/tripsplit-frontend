@@ -13,8 +13,10 @@ export interface Group {
   _id: string;
   name: string;
   description?: string;
-  members: User[] | string[];
-  createdBy: User | string;
+  user_ids: User[] | string[];
+  admin_id: User | string;
+  expenses_ids?: string[];
+  url_invite?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAddUserToGroup, useUsers } from '@/hooks/useApi';
 import { toast } from '@/lib/toast';
 import { Loader2, UserPlus } from 'lucide-react';
@@ -31,41 +32,40 @@ export default function AddMemberDialog({
 }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
   const { data: users, isLoading: loadingUsers } = useUsers();
   const addUserToGroup = useAddUserToGroup();
 
-  // Filter out users who are already members
   const availableUsers = (users || []).filter(
     (user) => !currentMemberIds.includes(user._id)
   );
 
-  // Filter users based on search query
   const filteredUsers = availableUsers.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleAddMember = async () => {
-    if (!selectedUserId) {
-      toast.error('Please select a user to add');
+  const handleAddMembers = async () => {
+    if (selectedUserIds.length === 0) {
+      toast.error('Please select at least one user to add');
       return;
     }
 
     try {
       await addUserToGroup.mutateAsync({
         groupId,
-        userId: selectedUserId,
+        userId: selectedUserIds,
       });
 
-      toast.success('Member added successfully!');
+      const count = selectedUserIds.length;
+      toast.success(`${count} ${count === 1 ? 'member' : 'members'} added successfully!`);
       setOpen(false);
       setSearchQuery('');
-      setSelectedUserId(null);
+      setSelectedUserIds([]);
       onSuccess?.();
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to add member';
+      const message = error.response?.data?.message || 'Failed to add members';
       toast.error(message);
     }
   };
@@ -74,7 +74,23 @@ export default function AddMemberDialog({
     setOpen(newOpen);
     if (!newOpen) {
       setSearchQuery('');
-      setSelectedUserId(null);
+      setSelectedUserIds([]);
+    }
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUserIds(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedUserIds.length === filteredUsers.length) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(filteredUsers.map(user => user._id));
     }
   };
 
@@ -93,15 +109,15 @@ export default function AddMemberDialog({
         {children || (
           <Button size="sm">
             <UserPlus className="h-4 w-4 mr-2" />
-            Add Member
+            Add Members
           </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Member</DialogTitle>
+          <DialogTitle>Add Members</DialogTitle>
           <DialogDescription>
-            Add a new member to this trip. Search for users by name or email.
+            Add members to this trip. You can select multiple users at once.
           </DialogDescription>
         </DialogHeader>
 
@@ -117,9 +133,21 @@ export default function AddMemberDialog({
             />
           </div>
 
-          {/* User List */}
           <div className="space-y-2">
-            <Label>Available Users</Label>
+            <div className="flex items-center justify-between">
+              <Label>Available Users ({selectedUserIds.length} selected)</Label>
+              {filteredUsers.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSelectAll}
+                  disabled={addUserToGroup.isPending}
+                >
+                  {selectedUserIds.length === filteredUsers.length ? 'Deselect All' : 'Select All'}
+                </Button>
+              )}
+            </div>
             <div className="border rounded-md max-h-[300px] overflow-y-auto">
               {loadingUsers ? (
                 <div className="p-8 text-center text-muted-foreground">
@@ -135,15 +163,16 @@ export default function AddMemberDialog({
               ) : (
                 <div className="divide-y">
                   {filteredUsers.map((user) => (
-                    <button
+                    <div
                       key={user._id}
-                      type="button"
-                      className={`w-full p-3 flex items-center gap-3 hover:bg-accent transition-colors ${
-                        selectedUserId === user._id ? 'bg-accent' : ''
-                      }`}
-                      onClick={() => setSelectedUserId(user._id)}
-                      disabled={addUserToGroup.isPending}
+                      className="p-3 flex items-center gap-3 hover:bg-accent transition-colors cursor-pointer"
+                      onClick={() => toggleUserSelection(user._id)}
                     >
+                      <Checkbox
+                        checked={selectedUserIds.includes(user._id)}
+                        onCheckedChange={() => toggleUserSelection(user._id)}
+                        disabled={addUserToGroup.isPending}
+                      />
                       <Avatar className="h-10 w-10">
                         {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
                         <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
@@ -152,10 +181,7 @@ export default function AddMemberDialog({
                         <div className="font-medium">{user.name}</div>
                         <div className="text-sm text-muted-foreground">{user.email}</div>
                       </div>
-                      {selectedUserId === user._id && (
-                        <div className="h-4 w-4 rounded-full bg-primary flex-shrink-0" />
-                      )}
-                    </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -173,8 +199,8 @@ export default function AddMemberDialog({
             Cancel
           </Button>
           <Button
-            onClick={handleAddMember}
-            disabled={!selectedUserId || addUserToGroup.isPending}
+            onClick={handleAddMembers}
+            disabled={selectedUserIds.length === 0 || addUserToGroup.isPending}
           >
             {addUserToGroup.isPending ? (
               <>
@@ -182,7 +208,7 @@ export default function AddMemberDialog({
                 Adding...
               </>
             ) : (
-              'Add Member'
+              `Add ${selectedUserIds.length > 0 ? `(${selectedUserIds.length})` : 'Members'}`
             )}
           </Button>
         </DialogFooter>

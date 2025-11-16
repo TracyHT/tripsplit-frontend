@@ -80,9 +80,9 @@ export default function TripDetails() {
     );
   }
 
-  const creatorId = typeof trip.createdBy === 'string' ? trip.createdBy : trip.createdBy._id;
+  const creatorId = typeof trip.admin_id === 'string' ? trip.admin_id : trip.admin_id._id;
   const isCreator = currentUser?._id === creatorId;
-  const members = Array.isArray(trip.members) ? trip.members : [];
+  const members = Array.isArray(trip.user_ids) ? trip.user_ids : [];
 
   // Note: In a real implementation, you would fetch expenses from the backend
   // For now, we'll show a placeholder

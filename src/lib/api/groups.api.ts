@@ -8,9 +8,9 @@ export const groupsApi = {
     return response.data;
   },
 
-  // Get all groups for current user
+  // Get all groups for current user (where user is admin)
   getUserGroups: async () => {
-    const response = await apiClient.get("/groups");
+    const response = await apiClient.get("/groups/admin/me");
     return response.data;
   },
 
@@ -33,14 +33,15 @@ export const groupsApi = {
   },
 
   // Add user to group (PUT /groups/:id/users)
-  addUserToGroup: async (groupId: string, userId: string) => {
-    const response = await apiClient.put(`/groups/${groupId}/users`, { userId });
+  addUserToGroup: async (groupId: string, userId: string | string[]) => {
+    const userIds = Array.isArray(userId) ? userId : [userId];
+    const response = await apiClient.put(`/groups/${groupId}/users`, { user_ids: userIds });
     return response.data;
   },
 
   // Remove user from group (DELETE /groups/:id/users)
   removeUserFromGroup: async (groupId: string, userId: string) => {
-    const response = await apiClient.delete(`/groups/${groupId}/users`, { data: { userId } });
+    const response = await apiClient.delete(`/groups/${groupId}/users`, { data: { user_id: userId } });
     return response.data;
   },
 

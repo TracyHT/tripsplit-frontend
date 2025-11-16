@@ -1,9 +1,15 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, Calendar } from 'lucide-react';
-import type { Group, User } from '@/types/api';
-import { useNavigate } from 'react-router-dom';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Users, Calendar } from "lucide-react";
+import type { Group, User } from "@/types/api";
+import { useNavigate } from "react-router-dom";
 
 interface TripCardProps {
   trip: Group;
@@ -12,7 +18,7 @@ interface TripCardProps {
 export default function TripCard({ trip }: TripCardProps) {
   const navigate = useNavigate();
 
-  const members = Array.isArray(trip.members) ? trip.members : [];
+  const members = Array.isArray(trip.user_ids) ? trip.user_ids : [];
   const memberCount = members.length;
 
   // Get first 3 members for avatar display
@@ -21,7 +27,11 @@ export default function TripCard({ trip }: TripCardProps) {
   // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   return (
@@ -31,13 +41,15 @@ export default function TripCard({ trip }: TripCardProps) {
     >
       <CardHeader>
         <div className="flex items-start justify-between">
-          <div className="flex-1">
+          <div className="flex-1 text-left">
             <CardTitle className="text-xl mb-1">{trip.name}</CardTitle>
             <CardDescription className="line-clamp-2">
-              {trip.description || 'No description'}
+              {trip.description || "No description"}
             </CardDescription>
           </div>
-          <Badge variant="secondary">{memberCount} {memberCount === 1 ? 'member' : 'members'}</Badge>
+          <Badge variant="secondary">
+            {memberCount} {memberCount === 1 ? "member" : "members"}
+          </Badge>
         </div>
       </CardHeader>
 
@@ -48,20 +60,30 @@ export default function TripCard({ trip }: TripCardProps) {
             <Users className="h-4 w-4 text-muted-foreground" />
             <div className="flex -space-x-2">
               {displayMembers.map((member) => {
-                const memberData = typeof member === 'string' ? null : member;
+                const memberData = typeof member === "string" ? null : member;
                 const initials = memberData?.name
                   ? memberData.name
-                      .split(' ')
+                      .split(" ")
                       .map((n) => n[0])
-                      .join('')
+                      .join("")
                       .toUpperCase()
                       .slice(0, 2)
-                  : '?';
+                  : "?";
 
                 return (
-                  <Avatar key={typeof member === 'string' ? member : member._id} className="h-8 w-8 border-2 border-background">
-                    {memberData?.avatar && <AvatarImage src={memberData.avatar} alt={memberData.name} />}
-                    <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                  <Avatar
+                    key={typeof member === "string" ? member : member._id}
+                    className="h-8 w-8 border-2 border-background"
+                  >
+                    {memberData?.avatar && (
+                      <AvatarImage
+                        src={memberData.avatar}
+                        alt={memberData.name}
+                      />
+                    )}
+                    <AvatarFallback className="text-xs">
+                      {initials}
+                    </AvatarFallback>
                   </Avatar>
                 );
               })}

@@ -1,10 +1,10 @@
-import { useGroups } from '@/hooks/useApi';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import TripCard from '@/components/trips/TripCard';
-import CreateTripDialog from '@/components/trips/CreateTripDialog';
-import { Button } from '@/components/ui/button';
-import { Loader2, MapPin } from 'lucide-react';
+import { useGroups } from "@/hooks/useApi";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import TripCard from "@/components/trips/TripCard";
+import CreateTripDialog from "@/components/trips/CreateTripDialog";
+import { Button } from "@/components/ui/button";
+import { Loader2, MapPin } from "lucide-react";
 
 export default function Trips() {
   const { data: trips, isLoading, error, refetch } = useGroups();
@@ -17,8 +17,8 @@ export default function Trips() {
         <div className="container mx-auto max-w-7xl">
           {/* Header Section */}
           <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">My Trips</h1>
+            <div className="text-left">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">My Groups</h1>
               <p className="text-muted-foreground">
                 Manage your group trips and track expenses
               </p>
@@ -54,8 +54,8 @@ export default function Trips() {
               </div>
               <h2 className="text-2xl font-semibold mb-2">No trips yet</h2>
               <p className="text-muted-foreground mb-6 max-w-md">
-                Create your first group trip to start tracking and splitting expenses with
-                friends and family.
+                Create your first group trip to start tracking and splitting
+                expenses with friends and family.
               </p>
               <CreateTripDialog onSuccess={() => refetch()}>
                 <Button size="lg">Create Your First Trip</Button>

@@ -26,8 +26,8 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
   const removeUserFromGroup = useRemoveUserFromGroup();
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
 
-  const members = Array.isArray(trip.members) ? (trip.members as User[]) : [];
-  const creatorId = typeof trip.createdBy === 'string' ? trip.createdBy : trip.createdBy._id;
+  const members = Array.isArray(trip.user_ids) ? (trip.user_ids as User[]) : [];
+  const creatorId = typeof trip.admin_id === 'string' ? trip.admin_id : trip.admin_id._id;
   const isCreator = currentUser?._id === creatorId;
   const currentMemberIds = members.map((m) => (typeof m === 'string' ? m : m._id));
 
