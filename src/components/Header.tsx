@@ -112,6 +112,13 @@ const Header = () => {
                 >
                   Dashboard
                 </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/trips")}
+                  className="font-medium"
+                >
+                  My Trips
+                </Button>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">
                     {user?.name || user?.email}
@@ -203,6 +210,13 @@ const Header = () => {
                     className="w-full justify-start font-medium"
                   >
                     Dashboard
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleNavClick("/trips")}
+                    className="w-full justify-start font-medium"
+                  >
+                    My Trips
                   </Button>
                   <Button
                     variant="ghost"
