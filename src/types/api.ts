@@ -15,7 +15,7 @@ export interface Group {
   description?: string;
   user_ids: User[] | string[];
   admin_id: User | string;
-  expenses_ids?: string[];
+  expenses_ids?: Expense[] | string[];
   url_invite?: string;
   createdAt: string;
   updatedAt: string;
@@ -27,9 +27,9 @@ export interface Expense {
   description: string;
   amount: number;
   category?: string;
-  paidBy: User | string;
-  group: Group | string;
-  date: string;
+  paid_by: (User | string)[];
+  paid_for: (User | string)[];
+  images?: string[];
   createdAt: string;
   updatedAt: string;
 }

@@ -6,71 +6,60 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useCreateExpense, useGroup } from '@/hooks/useApi';
-import { groupsApi } from '@/lib/api';
+import { useUpdateExpense } from '@/hooks/useApi';
 import { toast } from '@/lib/toast';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import type { User } from '@/types/api';
+import type { User, Expense } from '@/types/api';
 
-interface AddExpenseDialogProps {
-  groupId: string;
-  children?: React.ReactNode;
+interface EditExpenseDialogProps {
+  expense: Expense;
+  members: User[];
+  creator: User | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
 }
 
-export default function AddExpenseDialog({ groupId, children, onSuccess }: AddExpenseDialogProps) {
-  const [open, setOpen] = useState(false);
+export default function EditExpenseDialog({
+  expense,
+  members,
+  creator,
+  open,
+  onOpenChange,
+  onSuccess,
+}: EditExpenseDialogProps) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('');
   const [paidById, setPaidById] = useState<string>('');
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
 
   const { user } = useAuth();
-  const { data: group } = useGroup(groupId);
-  const createExpense = useCreateExpense();
+  const updateExpense = useUpdateExpense();
 
-  // Get members from user_ids as User objects
-  const userIdsMembers: User[] = (group?.user_ids || []).filter(
-    (m): m is User => typeof m === 'object' && m !== null && '_id' in m
-  );
-
-  // Get creator (admin) as User object
-  const creator: User | null = group?.admin_id && typeof group.admin_id === 'object' && '_id' in group.admin_id
-    ? group.admin_id as User
-    : null;
-
-  // Combine creator and members, ensuring no duplicates
-  const members: User[] = (() => {
-    const allMembers: User[] = [...userIdsMembers];
-    // Add creator if not already in the list
-    if (creator && !allMembers.some(m => m._id === creator._id)) {
-      allMembers.unshift(creator); // Add creator at the beginning
-    }
-    return allMembers;
-  })();
-
-  // Initialize paidById and selectedParticipants when dialog opens or members change
+  // Initialize form with expense data when dialog opens
   useEffect(() => {
-    if (open && members.length > 0) {
-      // Default payer to current user if they're a member, otherwise first member (creator)
-      const currentUserIsMember = members.some(m => m._id === user?._id);
-      if (!paidById) {
-        setPaidById(currentUserIsMember ? user!._id : members[0]._id);
-      }
-      // Default all members as participants
-      if (selectedParticipants.length === 0) {
-        setSelectedParticipants(members.map(m => m._id));
-      }
+    if (open && expense) {
+      setDescription(expense.description || '');
+      setAmount(expense.amount?.toString() || '');
+
+      // Set paid by
+      const paidByUser = expense.paid_by?.[0];
+      const paidByUserId = typeof paidByUser === 'string' ? paidByUser : paidByUser?._id;
+      setPaidById(paidByUserId || '');
+
+      // Set participants
+      const participantIds = (expense.paid_for || []).map(p =>
+        typeof p === 'string' ? p : p._id
+      );
+      setSelectedParticipants(participantIds);
     }
-  }, [open, members, user, paidById, selectedParticipants.length]);
+  }, [open, expense]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,16 +75,6 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
       return;
     }
 
-    if (!user) {
-      toast.error('You must be logged in to add expenses');
-      return;
-    }
-
-    if (!group) {
-      toast.error('Group not found');
-      return;
-    }
-
     if (!paidById) {
       toast.error('Please select who paid for this expense');
       return;
@@ -107,52 +86,28 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
     }
 
     try {
-      // Create the expense
-      const expenseResponse = await createExpense.mutateAsync({
-        description: description.trim(),
-        amount: amountNum,
-        paid_by: [paidById],
-        paid_for: selectedParticipants,
+      await updateExpense.mutateAsync({
+        expenseId: expense._id,
+        data: {
+          description: description.trim(),
+          amount: amountNum,
+          paid_by: [paidById],
+          paid_for: selectedParticipants,
+        },
       });
 
-      // Add expense to the group
-      const expenseId = expenseResponse?.data?._id || expenseResponse?._id;
-
-      if (!expenseId) {
-        toast.error('Failed to get expense ID from response');
-        return;
-      }
-
-      await groupsApi.addExpenseToGroup(groupId, expenseId);
-
-      toast.success('Expense added successfully!');
-      setOpen(false);
-      resetForm();
+      toast.success('Expense updated successfully!');
+      onOpenChange(false);
       onSuccess?.();
     } catch (error: any) {
       const status = error.response?.status;
-      const message = error.response?.data?.message || 'Failed to add expense';
+      const message = error.response?.data?.message || 'Failed to update expense';
 
       if (status === 401) {
         toast.error('Session expired. Please log in again.');
       } else {
         toast.error(message);
       }
-    }
-  };
-
-  const resetForm = () => {
-    setDescription('');
-    setAmount('');
-    setCategory('');
-    setPaidById('');
-    setSelectedParticipants([]);
-  };
-
-  const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
-    if (!newOpen) {
-      resetForm();
     }
   };
 
@@ -172,36 +127,18 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
     setSelectedParticipants([]);
   };
 
-  const categories = [
-    'Food & Dining',
-    'Transportation',
-    'Accommodation',
-    'Entertainment',
-    'Shopping',
-    'Activities',
-    'Other',
-  ];
-
   // Calculate split amount per person
   const splitAmount = selectedParticipants.length > 0 && amount
     ? (parseFloat(amount) / selectedParticipants.length).toFixed(2)
     : '0.00';
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Expense
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Expense</DialogTitle>
+          <DialogTitle>Edit Expense</DialogTitle>
           <DialogDescription>
-            Add a new expense to this trip and specify who paid and who's included.
+            Update the expense details.
           </DialogDescription>
         </DialogHeader>
 
@@ -209,61 +146,42 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
           <div className="space-y-4 py-4">
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
+              <Label htmlFor="edit-description">Description *</Label>
               <Input
-                id="description"
+                id="edit-description"
                 placeholder="e.g., Dinner at restaurant"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                disabled={createExpense.isPending}
+                disabled={updateExpense.isPending}
                 required
               />
             </div>
 
             {/* Amount */}
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount (USD) *</Label>
+              <Label htmlFor="edit-amount">Amount (USD) *</Label>
               <Input
-                id="amount"
+                id="edit-amount"
                 type="number"
                 step="0.01"
                 min="0.01"
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                disabled={createExpense.isPending}
+                disabled={updateExpense.isPending}
                 required
               />
             </div>
 
-            {/* Category */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Category (Optional)</Label>
-              <select
-                id="category"
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                disabled={createExpense.isPending}
-              >
-                <option value="">Select a category</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             {/* Paid By */}
             <div className="space-y-2">
-              <Label htmlFor="paidBy">Paid by *</Label>
+              <Label htmlFor="edit-paidBy">Paid by *</Label>
               <select
-                id="paidBy"
+                id="edit-paidBy"
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={paidById}
                 onChange={(e) => setPaidById(e.target.value)}
-                disabled={createExpense.isPending}
+                disabled={updateExpense.isPending}
                 required
               >
                 <option value="">Select who paid</option>
@@ -297,7 +215,7 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
                     size="sm"
                     className="h-6 px-2 text-xs"
                     onClick={selectAllParticipants}
-                    disabled={createExpense.isPending}
+                    disabled={updateExpense.isPending}
                   >
                     Select All
                   </Button>
@@ -307,7 +225,7 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
                     size="sm"
                     className="h-6 px-2 text-xs"
                     onClick={deselectAllParticipants}
-                    disabled={createExpense.isPending}
+                    disabled={updateExpense.isPending}
                   >
                     Deselect All
                   </Button>
@@ -316,24 +234,24 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
               <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto">
                 {members.map((member) => {
                   const isCurrentUser = member._id === user?._id;
-                  const isCreator = member._id === creator?._id;
-                  const label = isCurrentUser && isCreator
+                  const isCreatorMember = member._id === creator?._id;
+                  const label = isCurrentUser && isCreatorMember
                     ? '(You, Creator)'
                     : isCurrentUser
                       ? '(You)'
-                      : isCreator
+                      : isCreatorMember
                         ? '(Creator)'
                         : '';
                   return (
                     <div key={member._id} className="flex items-center space-x-2">
                       <Checkbox
-                        id={`participant-${member._id}`}
+                        id={`edit-participant-${member._id}`}
                         checked={selectedParticipants.includes(member._id)}
                         onCheckedChange={() => toggleParticipant(member._id)}
-                        disabled={createExpense.isPending}
+                        disabled={updateExpense.isPending}
                       />
                       <label
-                        htmlFor={`participant-${member._id}`}
+                        htmlFor={`edit-participant-${member._id}`}
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                       >
                         {member.name} {label}
@@ -366,19 +284,19 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={createExpense.isPending}
+              onClick={() => onOpenChange(false)}
+              disabled={updateExpense.isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={createExpense.isPending}>
-              {createExpense.isPending ? (
+            <Button type="submit" disabled={updateExpense.isPending}>
+              {updateExpense.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding...
+                  Saving...
                 </>
               ) : (
-                'Add Expense'
+                'Save Changes'
               )}
             </Button>
           </DialogFooter>

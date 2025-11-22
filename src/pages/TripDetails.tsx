@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Loader2, MoreVertical, Edit2, Trash2, Users, Receipt, DollarSign } from 'lucide-react';
 import { toast } from '@/lib/toast';
@@ -28,16 +29,16 @@ export default function TripDetails() {
   const { data: trip, isLoading, error, refetch } = useGroup(id!);
   const deleteGroup = useDeleteGroup();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
     if (!trip) return;
 
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete "${trip.name}"? This action cannot be undone and will remove all expenses and data associated with this trip.`
-    );
-
-    if (!confirmDelete) return;
-
+    setShowDeleteDialog(false);
     setIsDeleting(true);
     try {
       await deleteGroup.mutateAsync(trip._id);
@@ -84,9 +85,11 @@ export default function TripDetails() {
   const isCreator = currentUser?._id === creatorId;
   const members = Array.isArray(trip.user_ids) ? trip.user_ids : [];
 
-  // Note: In a real implementation, you would fetch expenses from the backend
-  // For now, we'll show a placeholder
-  const expenses: Expense[] = [];
+  // Get expenses from the populated expenses_ids field
+  // Filter to only include populated expense objects (not string IDs)
+  const expenses: Expense[] = Array.isArray(trip.expenses_ids)
+    ? trip.expenses_ids.filter((e): e is Expense => typeof e === 'object' && e !== null && '_id' in e)
+    : [];
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
@@ -104,14 +107,17 @@ export default function TripDetails() {
       <main className="flex-1 pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-7xl">
           {/* Back Button */}
-          <Button
-            variant="ghost"
-            className="mb-6"
-            onClick={() => navigate('/trips')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Trips
-          </Button>
+          <div className="flex justify-start">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4 -ml-3 text-muted-foreground hover:text-foreground"
+              onClick={() => navigate('/trips')}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to Trips
+            </Button>
+          </div>
 
           {/* Trip Header */}
           <div className="flex items-start justify-between mb-8">
@@ -141,7 +147,7 @@ export default function TripDetails() {
                       </DropdownMenuItem>
                     </EditTripDialog>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem destructive onClick={handleDelete}>
+                    <DropdownMenuItem destructive onClick={handleDeleteClick}>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete Trip
                     </DropdownMenuItem>
@@ -204,13 +210,27 @@ export default function TripDetails() {
             <ExpenseList
               groupId={trip._id}
               expenses={expenses}
+              group={trip}
               onExpenseAdded={() => refetch()}
+              onExpenseDeleted={() => refetch()}
+              onExpenseUpdated={() => refetch()}
             />
           </div>
         </div>
       </main>
 
       <Footer />
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Trip"
+        description={`Are you sure you want to delete "${trip?.name}"? This action cannot be undone and will remove all expenses and data associated with this trip.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }
