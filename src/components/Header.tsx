@@ -1,19 +1,21 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Moon, Sun, Receipt } from "lucide-react";
+import { Menu, X, Moon, Sun, Receipt, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/lib/toast";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { theme, setTheme } = useTheme();
+  const { isAuthenticated, user, logout } = useAuth();
 
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setIsDarkMode(isDark);
-  }, []);
+  const isLandingPage = location.pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,16 +27,7 @@ const Header = () => {
   }, []);
 
   const toggleDarkMode = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-
-    if (newMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const handleNavClick = (path: string) => {
@@ -42,12 +35,30 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
-  const navLinks = [
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      navigate('/');
+      setIsMenuOpen(false);
+    } catch (error) {
+      toast.error('Failed to logout');
+    }
+  };
+
+  const landingNavLinks = [
     { name: "Home", path: "/" },
     { name: "Features", path: "#features" },
     { name: "How It Works", path: "#how-it-works" },
     { name: "Pricing", path: "#pricing" },
   ];
+
+  const appNavLinks = [
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "My Trips", path: "/trips" },
+  ];
+
+  const navLinks = isLandingPage ? landingNavLinks : appNavLinks;
 
   return (
     <header
@@ -95,27 +106,48 @@ const Header = () => {
               className="p-2 rounded-lg hover:bg-muted transition-colors"
               aria-label="Toggle dark mode"
             >
-              {isDarkMode ? (
+              {theme === "dark" ? (
                 <Sun className="w-5 h-5 text-foreground" />
               ) : (
                 <Moon className="w-5 h-5 text-foreground" />
               )}
             </button>
 
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/login")}
-              className="font-medium"
-            >
-              Log In
-            </Button>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                >
+                  {user?.name || user?.email}
+                </button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleLogout}
+                  className="hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/login")}
+                  className="font-medium"
+                >
+                  Sign In
+                </Button>
 
-            <Button
-              onClick={() => navigate("/signup")}
-              className="shadow-md hover:shadow-lg transition-all"
-            >
-              Get Started
-            </Button>
+                <Button
+                  onClick={() => navigate("/signup")}
+                  className="shadow-md hover:shadow-lg transition-all"
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           <div className="flex md:hidden items-center gap-2">
@@ -124,7 +156,7 @@ const Header = () => {
               className="p-2 rounded-lg hover:bg-muted transition-colors"
               aria-label="Toggle dark mode"
             >
-              {isDarkMode ? (
+              {theme === "dark" ? (
                 <Sun className="w-5 h-5 text-foreground" />
               ) : (
                 <Moon className="w-5 h-5 text-foreground" />
@@ -164,20 +196,42 @@ const Header = () => {
             ))}
 
             <div className="pt-4 space-y-2 border-t border-border mt-4">
-              <Button
-                variant="ghost"
-                onClick={() => handleNavClick("/login")}
-                className="w-full justify-start font-medium"
-              >
-                Log In
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleNavClick("/dashboard")}
+                    className="w-full justify-start font-medium"
+                  >
+                    {user?.name || user?.email}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    className="w-full justify-start font-medium text-destructive hover:text-destructive"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Log Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleNavClick("/login")}
+                    className="w-full justify-start font-medium"
+                  >
+                    Log In
+                  </Button>
 
-              <Button
-                onClick={() => handleNavClick("/signup")}
-                className="w-full shadow-md"
-              >
-                Get Started
-              </Button>
+                  <Button
+                    onClick={() => handleNavClick("/signup")}
+                    className="w-full shadow-md"
+                  >
+                    Get Started
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
