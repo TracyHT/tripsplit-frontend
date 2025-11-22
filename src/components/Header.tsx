@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Moon, Sun, Receipt, LogOut } from "lucide-react";
@@ -11,8 +11,11 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, setTheme } = useTheme();
   const { isAuthenticated, user, logout } = useAuth();
+
+  const isLandingPage = location.pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,12 +46,19 @@ const Header = () => {
     }
   };
 
-  const navLinks = [
+  const landingNavLinks = [
     { name: "Home", path: "/" },
     { name: "Features", path: "#features" },
     { name: "How It Works", path: "#how-it-works" },
     { name: "Pricing", path: "#pricing" },
   ];
+
+  const appNavLinks = [
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "My Trips", path: "/trips" },
+  ];
+
+  const navLinks = isLandingPage ? landingNavLinks : appNavLinks;
 
   return (
     <header
@@ -104,28 +114,22 @@ const Header = () => {
             </button>
 
             {isAuthenticated ? (
-              <>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                >
+                  {user?.name || user?.email}
+                </button>
                 <Button
                   variant="ghost"
-                  onClick={() => navigate("/dashboard")}
-                  className="font-medium"
+                  size="icon"
+                  onClick={handleLogout}
+                  className="hover:bg-destructive/10 hover:text-destructive"
                 >
-                  Dashboard
+                  <LogOut className="w-4 h-4" />
                 </Button>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    {user?.name || user?.email}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleLogout}
-                    className="hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </div>
-              </>
+              </div>
             ) : (
               <>
                 <Button
@@ -194,15 +198,12 @@ const Header = () => {
             <div className="pt-4 space-y-2 border-t border-border mt-4">
               {isAuthenticated ? (
                 <>
-                  <div className="px-4 py-2 text-sm text-muted-foreground">
-                    {user?.name || user?.email}
-                  </div>
                   <Button
                     variant="ghost"
                     onClick={() => handleNavClick("/dashboard")}
                     className="w-full justify-start font-medium"
                   >
-                    Dashboard
+                    {user?.name || user?.email}
                   </Button>
                   <Button
                     variant="ghost"

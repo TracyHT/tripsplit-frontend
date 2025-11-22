@@ -161,7 +161,7 @@ export function useAddUserToGroup() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ groupId, userId }: { groupId: string; userId: string }) =>
+    mutationFn: ({ groupId, userId }: { groupId: string; userId: string | string[] }) =>
       groupsApi.addUserToGroup(groupId, userId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["groups", variables.groupId] });

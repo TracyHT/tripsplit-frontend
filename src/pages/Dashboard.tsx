@@ -1,17 +1,22 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, Receipt, TrendingUp, DollarSign } from 'lucide-react';
+import CreateTripDialog from '@/components/trips/CreateTripDialog';
+import { useGroups } from '@/hooks/useApi';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { data: trips, refetch } = useGroups();
 
   const stats = [
     {
       title: 'Active Trips',
-      value: '0',
+      value: trips?.length?.toString() || '0',
       icon: Users,
       description: 'Current group trips',
     },
@@ -80,9 +85,11 @@ export default function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-4">
-              <Button>Create New Trip</Button>
-              <Button variant="outline">Add Expense</Button>
-              <Button variant="outline">Settle Up</Button>
+              <CreateTripDialog onSuccess={() => refetch()}>
+                <Button>Create New Trip</Button>
+              </CreateTripDialog>
+              <Button variant="outline" onClick={() => navigate('/trips')}>View All Trips</Button>
+              <Button variant="outline" disabled>Settle Up</Button>
             </CardContent>
           </Card>
 
