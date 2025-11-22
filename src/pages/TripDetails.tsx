@@ -207,6 +207,7 @@ export default function TripDetails() {
               groupId={trip._id}
               expenses={expenses}
               onExpenseAdded={() => refetch()}
+              onExpenseDeleted={() => refetch()}
             />
           </div>
         </div>

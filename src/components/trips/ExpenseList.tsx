@@ -1,16 +1,31 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Receipt, DollarSign, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Receipt, DollarSign, Calendar, MoreVertical, Trash2, Loader2 } from 'lucide-react';
 import type { Expense, User } from '@/types/api';
 import AddExpenseDialog from './AddExpenseDialog';
+import { useDeleteExpense } from '@/hooks/useApi';
+import { groupsApi } from '@/lib/api';
+import { toast } from '@/lib/toast';
 
 interface ExpenseListProps {
   groupId: string;
   expenses: Expense[];
   onExpenseAdded?: () => void;
+  onExpenseDeleted?: () => void;
 }
 
-export default function ExpenseList({ groupId, expenses, onExpenseAdded }: ExpenseListProps) {
+export default function ExpenseList({ groupId, expenses, onExpenseAdded, onExpenseDeleted }: ExpenseListProps) {
+  const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
+  const deleteExpense = useDeleteExpense();
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -21,6 +36,29 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded }: Expen
       style: 'currency',
       currency: 'USD',
     }).format(amount);
+  };
+
+  const handleDeleteExpense = async (expenseId: string, expenseDescription: string) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${expenseDescription}"? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    setDeletingExpenseId(expenseId);
+    try {
+      // Remove expense from group first
+      await groupsApi.removeExpenseFromGroup(groupId, expenseId);
+      // Then delete the expense
+      await deleteExpense.mutateAsync(expenseId);
+      toast.success('Expense deleted successfully');
+      onExpenseDeleted?.();
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to delete expense';
+      toast.error(message);
+    } finally {
+      setDeletingExpenseId(null);
+    }
   };
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -52,11 +90,12 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded }: Expen
               const firstPayer = expense.paid_by?.[0];
               const paidByUser = typeof firstPayer === 'object' && firstPayer !== null ? firstPayer as User : null;
               const paidByName = paidByUser?.name || 'Unknown';
+              const isDeleting = deletingExpenseId === expense._id;
 
               return (
                 <div
                   key={expense._id}
-                  className="flex items-start gap-4 p-4 rounded-lg border hover:bg-accent/50 transition-colors"
+                  className={`flex items-start gap-4 p-4 rounded-lg border hover:bg-accent/50 transition-colors ${isDeleting ? 'opacity-50' : ''}`}
                 >
                   <div className="flex-shrink-0 mt-1">
                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -67,9 +106,31 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded }: Expen
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <h4 className="font-medium">{expense.description}</h4>
-                      <div className="flex items-center gap-1 text-lg font-semibold flex-shrink-0">
-                        <DollarSign className="h-4 w-4" />
-                        {expense.amount.toFixed(2)}
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 text-lg font-semibold flex-shrink-0">
+                          <DollarSign className="h-4 w-4" />
+                          {expense.amount.toFixed(2)}
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={isDeleting}>
+                              {isDeleting ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <MoreVertical className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => handleDeleteExpense(expense._id, expense.description)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
 
