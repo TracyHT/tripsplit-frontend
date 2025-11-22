@@ -1,127 +1,163 @@
-# TripSplit Frontend
+# TripSplit
 
-React + TypeScript frontend for TripSplit - a group expense tracking and bill splitting application.
+A modern group expense tracking and bill splitting application built with React, TypeScript, and Tailwind CSS.
 
----
+## Overview
 
-## 🚀 Quick Start
+TripSplit helps groups manage shared expenses during trips, events, or everyday situations. Users can create trips, add members, track expenses, and settle up with optimized payment suggestions.
 
-### 1. Start the frontend
+## Features
+
+### Trip Management
+
+- Create and manage group trips
+- Add/remove members from trips
+- Edit trip details (name, description)
+- Delete trips (creator only)
+
+### Expense Tracking
+
+- Add expenses with description, amount, and category
+- Select who paid and who benefits from each expense
+- Edit and delete expenses
+- View expense history per trip
+
+### Settlement & Balances
+
+- Real-time balance calculation per member
+- Optimized settlement suggestions (minimize number of transactions)
+- View who owes whom and how much
+- Settle Up dialog with clear payment instructions
+
+### User Experience
+
+- Responsive design for mobile and desktop
+- Dashboard with expense overview and recent activity
+- Member avatars and intuitive UI
+- Custom confirmation dialogs
+
+## Tech Stack
+
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **State Management**: React Query (TanStack Query)
+- **HTTP Client**: Axios
+- **Authentication**: JWT tokens
+- **Backend**: Node.js, Express, MongoDB
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Backend server running (see backend repository)
+
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/TracyHT/tripsplit-frontend.git
+cd tripsplit-frontend
+```
+
+2. Install dependencies
+
 ```bash
 npm install
+```
+
+3. Set up environment variables
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set your backend API URL:
+
+```
+VITE_API_URL=http://localhost:8000/api
+```
+
+4. Start the development server
+
+```bash
 npm run dev
 ```
 
-### 2. Test the API
-Visit the comprehensive test dashboard:
-**[http://localhost:5173/test](http://localhost:5173/test)** ⭐
+5. Open [http://localhost:5173](http://localhost:5173)
 
-### 3. Set up the backend
-Follow [QUICK_START.md](./QUICK_START.md) for complete MongoDB and backend setup.
+## Project Structure
 
----
-
-## 🎯 Key Features
-
-- ✅ **Complete API Integration** - All backend endpoints connected
-- ✅ **TypeScript Support** - Full type safety
-- ✅ **React Query Hooks** - Optimized data fetching and caching
-- ✅ **Test Dashboard** - Visual interface to test all APIs
-- ✅ **MongoDB Integration** - Ready for MongoDB Compass
-- ✅ **Authentication** - JWT + Session + OAuth (Google/Facebook)
-- ✅ **Group Trip Management** - Create, edit, and manage group trips
-- ✅ **Member Management** - Add/remove members from trips
-- ✅ **Expense Tracking** - Add and track expenses for trips
-- ✅ **Modern UI Components** - Built with shadcn/ui and Tailwind CSS
-
----
-
-## 🧪 Test Dashboard
-
-The **API Test Dashboard** provides a visual interface to test all backend endpoints:
-
-**URL**: [http://localhost:5173/test](http://localhost:5173/test)
-
-Features:
-- ✅ Color-coded status indicators
-- ✅ Real-time response viewer
-- ✅ Organized by API category (Auth, Users, Groups, Expenses, Splits)
-- ✅ Pre-filled test data
-- ✅ Shows current logged-in user
-
-See [TEST_DASHBOARD_GUIDE.md](./TEST_DASHBOARD_GUIDE.md) for detailed usage.
-
----
-
-## 📚 Documentation
-
-| File | Description |
-|------|-------------|
-| [QUICK_START.md](./QUICK_START.md) | **Start here!** Complete setup guide |
-| [TEST_DASHBOARD_GUIDE.md](./TEST_DASHBOARD_GUIDE.md) | How to use the test dashboard |
-| [API_ENDPOINTS_SUMMARY.md](./API_ENDPOINTS_SUMMARY.md) | All API endpoints reference |
-| [MONGODB_SETUP.md](./MONGODB_SETUP.md) | MongoDB Compass setup |
-| [BACKEND_ENV_TEMPLATE.md](./BACKEND_ENV_TEMPLATE.md) | Backend env variables |
-
----
-
-## 💻 Usage Example
-
-```typescript
-import { useLogin, useGroups, useCreateExpense } from '@/hooks/useApi';
-
-function MyComponent() {
-  const login = useLogin();
-  const { data: groups } = useGroups();
-  const createExpense = useCreateExpense();
-
-  const handleLogin = () => {
-    login.mutate({
-      email: 'user@example.com',
-      password: 'password123'
-    });
-  };
-
-  return (
-    <div>
-      {groups?.map(group => (
-        <div key={group._id}>{group.name}</div>
-      ))}
-    </div>
-  );
-}
+```
+src/
+├── components/          # Reusable UI components
+│   ├── trips/          # Trip-related components
+│   │   ├── AddExpenseDialog.tsx
+│   │   ├── EditExpenseDialog.tsx
+│   │   ├── ExpenseList.tsx
+│   │   ├── MemberList.tsx
+│   │   ├── SettleUpDialog.tsx
+│   │   └── ...
+│   └── ui/             # Base UI components (shadcn/ui)
+├── contexts/           # React contexts (Auth)
+├── hooks/              # Custom hooks (useApi)
+├── lib/
+│   └── api/            # API client and endpoints
+├── pages/              # Page components
+│   ├── Dashboard.tsx
+│   ├── TripDetails.tsx
+│   ├── Trips.tsx
+│   └── ...
+├── types/              # TypeScript type definitions
+└── App.tsx             # Main app component
 ```
 
----
+## Application Routes
 
-## 🗺️ Application Routes
+| Route        | Description                                        |
+| ------------ | -------------------------------------------------- |
+| `/`          | Landing page                                       |
+| `/login`     | User login                                         |
+| `/signup`    | User registration                                  |
+| `/dashboard` | User dashboard with stats and recent activity      |
+| `/trips`     | List of all user trips                             |
+| `/trips/:id` | Trip details with members, expenses, and settle up |
 
-- `/` - Landing page
-- `/login` - User login
-- `/signup` - User registration
-- `/dashboard` - User dashboard with overview
-- `/trips` - List of all user trips
-- `/trips/:id` - Trip details with members and expenses
-- `/test` - API test dashboard
+## API Integration
 
----
+All API calls are managed through React Query hooks in `src/hooks/useApi.ts`:
 
-## 🛠️ Tech Stack
+```typescript
+// Examples
+const { data: trips } = useGroups();
+const { data: balances } = useBalances(groupId);
+const createExpense = useCreateExpense();
+const settleUp = useSettleUp();
+```
 
-- React 19 + TypeScript
-- Vite + Tailwind CSS
-- React Query + Axios
-- Shadcn/ui components
+## Available Scripts
 
----
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run preview  # Preview production build
+npm run lint     # Run ESLint
+```
 
-## 🌟 Next Steps
+## Contributing
 
-1. Follow [QUICK_START.md](./QUICK_START.md) to set up MongoDB and backend
-2. Use [http://localhost:5173/test](http://localhost:5173/test) to test all endpoints
-3. Check MongoDB Compass to view data
-4. Start building your features!
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Open a Pull Request
 
----
+## Backend Repository:
 
-**Backend Repository**: [github.com/vinhvrs/TripSplit](https://github.com/vinhvrs/TripSplit)
+[github.com/vinhvrs/TripSplit](https://github.com/vinhvrs/TripSplit)
+
+## License
+
+This project is licensed under the MIT License.
