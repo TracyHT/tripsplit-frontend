@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,17 +7,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useCreateExpense, useGroup } from '@/hooks/useApi';
-import { groupsApi } from '@/lib/api';
-import { toast } from '@/lib/toast';
-import { Loader2, Plus } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import type { User } from '@/types/api';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useCreateExpense, useGroup } from "@/hooks/useApi";
+import { groupsApi } from "@/lib/api";
+import { toast } from "@/lib/toast";
+import { Loader2, Plus } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import type { User } from "@/types/api";
 
 interface AddExpenseDialogProps {
   groupId: string;
@@ -25,13 +25,20 @@ interface AddExpenseDialogProps {
   onSuccess?: () => void;
 }
 
-export default function AddExpenseDialog({ groupId, children, onSuccess }: AddExpenseDialogProps) {
+export default function AddExpenseDialog({
+  groupId,
+  children,
+  onSuccess,
+}: AddExpenseDialogProps) {
   const [open, setOpen] = useState(false);
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('');
-  const [paidById, setPaidById] = useState<string>('');
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
+  const [paidById, setPaidById] = useState<string>("");
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(
+    []
+  );
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   const { user } = useAuth();
   const { data: group } = useGroup(groupId);
@@ -39,19 +46,22 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
 
   // Get members from user_ids as User objects
   const userIdsMembers: User[] = (group?.user_ids || []).filter(
-    (m): m is User => typeof m === 'object' && m !== null && '_id' in m
+    (m): m is User => typeof m === "object" && m !== null && "_id" in m
   );
 
   // Get creator (admin) as User object
-  const creator: User | null = group?.admin_id && typeof group.admin_id === 'object' && '_id' in group.admin_id
-    ? group.admin_id as User
-    : null;
+  const creator: User | null =
+    group?.admin_id &&
+    typeof group.admin_id === "object" &&
+    "_id" in group.admin_id
+      ? (group.admin_id as User)
+      : null;
 
   // Combine creator and members, ensuring no duplicates
   const members: User[] = (() => {
     const allMembers: User[] = [...userIdsMembers];
     // Add creator if not already in the list
-    if (creator && !allMembers.some(m => m._id === creator._id)) {
+    if (creator && !allMembers.some((m) => m._id === creator._id)) {
       allMembers.unshift(creator); // Add creator at the beginning
     }
     return allMembers;
@@ -59,50 +69,49 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
 
   // Initialize paidById and selectedParticipants when dialog opens or members change
   useEffect(() => {
-    if (open && members.length > 0) {
+    if (open && members.length > 0 && !hasInitialized) {
       // Default payer to current user if they're a member, otherwise first member (creator)
-      const currentUserIsMember = members.some(m => m._id === user?._id);
+      const currentUserIsMember = members.some((m) => m._id === user?._id);
       if (!paidById) {
         setPaidById(currentUserIsMember ? user!._id : members[0]._id);
       }
       // Default all members as participants
-      if (selectedParticipants.length === 0) {
-        setSelectedParticipants(members.map(m => m._id));
-      }
+      setSelectedParticipants(members.map((m) => m._id));
+      setHasInitialized(true);
     }
-  }, [open, members, user, paidById, selectedParticipants.length]);
+  }, [open, members, user, paidById, hasInitialized]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!description.trim()) {
-      toast.error('Please enter a description');
+      toast.error("Please enter a description");
       return;
     }
 
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
-      toast.error('Please enter a valid amount');
+      toast.error("Please enter a valid amount");
       return;
     }
 
     if (!user) {
-      toast.error('You must be logged in to add expenses');
+      toast.error("You must be logged in to add expenses");
       return;
     }
 
     if (!group) {
-      toast.error('Group not found');
+      toast.error("Group not found");
       return;
     }
 
     if (!paidById) {
-      toast.error('Please select who paid for this expense');
+      toast.error("Please select who paid for this expense");
       return;
     }
 
     if (selectedParticipants.length === 0) {
-      toast.error('Please select at least one participant');
+      toast.error("Please select at least one participant");
       return;
     }
 
@@ -119,22 +128,22 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
       const expenseId = expenseResponse?.data?._id || expenseResponse?._id;
 
       if (!expenseId) {
-        toast.error('Failed to get expense ID from response');
+        toast.error("Failed to get expense ID from response");
         return;
       }
 
       await groupsApi.addExpenseToGroup(groupId, expenseId);
 
-      toast.success('Expense added successfully!');
+      toast.success("Expense added successfully!");
       setOpen(false);
       resetForm();
       onSuccess?.();
     } catch (error: any) {
       const status = error.response?.status;
-      const message = error.response?.data?.message || 'Failed to add expense';
+      const message = error.response?.data?.message || "Failed to add expense";
 
       if (status === 401) {
-        toast.error('Session expired. Please log in again.');
+        toast.error("Session expired. Please log in again.");
       } else {
         toast.error(message);
       }
@@ -142,11 +151,12 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
   };
 
   const resetForm = () => {
-    setDescription('');
-    setAmount('');
-    setCategory('');
-    setPaidById('');
+    setDescription("");
+    setAmount("");
+    setCategory("");
+    setPaidById("");
     setSelectedParticipants([]);
+    setHasInitialized(false);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -157,15 +167,15 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
   };
 
   const toggleParticipant = (memberId: string) => {
-    setSelectedParticipants(prev =>
+    setSelectedParticipants((prev) =>
       prev.includes(memberId)
-        ? prev.filter(id => id !== memberId)
+        ? prev.filter((id) => id !== memberId)
         : [...prev, memberId]
     );
   };
 
   const selectAllParticipants = () => {
-    setSelectedParticipants(members.map(m => m._id));
+    setSelectedParticipants(members.map((m) => m._id));
   };
 
   const deselectAllParticipants = () => {
@@ -173,19 +183,20 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
   };
 
   const categories = [
-    'Food & Dining',
-    'Transportation',
-    'Accommodation',
-    'Entertainment',
-    'Shopping',
-    'Activities',
-    'Other',
+    "Food & Dining",
+    "Transportation",
+    "Accommodation",
+    "Entertainment",
+    "Shopping",
+    "Activities",
+    "Other",
   ];
 
   // Calculate split amount per person
-  const splitAmount = selectedParticipants.length > 0 && amount
-    ? (parseFloat(amount) / selectedParticipants.length).toFixed(2)
-    : '0.00';
+  const splitAmount =
+    selectedParticipants.length > 0 && amount
+      ? (parseFloat(amount) / selectedParticipants.length).toFixed(2)
+      : "0.00";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -201,7 +212,8 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
         <DialogHeader>
           <DialogTitle>Add Expense</DialogTitle>
           <DialogDescription>
-            Add a new expense to this trip and specify who paid and who's included.
+            Add a new expense to this trip and specify who paid and who's
+            included.
           </DialogDescription>
         </DialogHeader>
 
@@ -266,17 +278,17 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
                 disabled={createExpense.isPending}
                 required
               >
-                <option value="">Select who paid</option>
                 {members.map((member) => {
                   const isCurrentUser = member._id === user?._id;
                   const isCreator = member._id === creator?._id;
-                  const label = isCurrentUser && isCreator
-                    ? '(You, Creator)'
-                    : isCurrentUser
-                      ? '(You)'
+                  const label =
+                    isCurrentUser && isCreator
+                      ? "(You, Creator)"
+                      : isCurrentUser
+                      ? "(You)"
                       : isCreator
-                        ? '(Creator)'
-                        : '';
+                      ? "(Creator)"
+                      : "";
                   return (
                     <option key={member._id} value={member._id}>
                       {member.name} {label}
@@ -289,43 +301,49 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
             {/* Participants (Split between) */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Split between *</Label>
+                <Label className={selectedParticipants.length === 0 ? "text-destructive" : ""}>
+                  Split between * {selectedParticipants.length > 0 && `(${selectedParticipants.length})`}
+                </Label>
                 <div className="flex gap-2">
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     className="h-6 px-2 text-xs"
                     onClick={selectAllParticipants}
-                    disabled={createExpense.isPending}
+                    disabled={createExpense.isPending || selectedParticipants.length === members.length}
                   >
                     Select All
                   </Button>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     className="h-6 px-2 text-xs"
                     onClick={deselectAllParticipants}
-                    disabled={createExpense.isPending}
+                    disabled={createExpense.isPending || selectedParticipants.length === 0}
                   >
                     Deselect All
                   </Button>
                 </div>
               </div>
-              <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto">
+              <div className={`border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto ${selectedParticipants.length === 0 ? "border-destructive" : ""}`}>
                 {members.map((member) => {
                   const isCurrentUser = member._id === user?._id;
                   const isCreator = member._id === creator?._id;
-                  const label = isCurrentUser && isCreator
-                    ? '(You, Creator)'
-                    : isCurrentUser
-                      ? '(You)'
+                  const label =
+                    isCurrentUser && isCreator
+                      ? "(You, Creator)"
+                      : isCurrentUser
+                      ? "(You)"
                       : isCreator
-                        ? '(Creator)'
-                        : '';
+                      ? "(Creator)"
+                      : "";
                   return (
-                    <div key={member._id} className="flex items-center space-x-2">
+                    <div
+                      key={member._id}
+                      className="flex items-center space-x-2"
+                    >
                       <Checkbox
                         id={`participant-${member._id}`}
                         checked={selectedParticipants.includes(member._id)}
@@ -350,13 +368,14 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
               <p className="text-muted-foreground">
                 {selectedParticipants.length > 0 ? (
                   <>
-                    Split equally among {selectedParticipants.length} {selectedParticipants.length === 1 ? 'person' : 'people'}
+                    Split equally among {selectedParticipants.length}{" "}
+                    {selectedParticipants.length === 1 ? "person" : "people"}
                     {amount && parseFloat(amount) > 0 && (
                       <> — ${splitAmount} each</>
                     )}
                   </>
                 ) : (
-                  'Select participants to split the expense'
+                  "Select participants to split the expense"
                 )}
               </p>
             </div>
@@ -378,7 +397,7 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
                   Adding...
                 </>
               ) : (
-                'Add Expense'
+                "Add Expense"
               )}
             </Button>
           </DialogFooter>

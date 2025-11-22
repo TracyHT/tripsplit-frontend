@@ -22,13 +22,15 @@ interface AddMemberDialogProps {
   currentMemberIds: string[];
   children?: React.ReactNode;
   onSuccess?: () => void;
+  disabled?: boolean;
 }
 
 export default function AddMemberDialog({
   groupId,
   currentMemberIds,
   children,
-  onSuccess
+  onSuccess,
+  disabled = false,
 }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,7 +109,7 @@ export default function AddMemberDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children || (
-          <Button size="sm">
+          <Button size="sm" disabled={disabled}>
             <UserPlus className="h-4 w-4 mr-2" />
             Add Members
           </Button>
@@ -165,7 +167,7 @@ export default function AddMemberDialog({
                   {filteredUsers.map((user) => (
                     <div
                       key={user._id}
-                      className="p-3 flex items-center gap-3 hover:bg-accent transition-colors cursor-pointer"
+                      className="p-3 flex items-center gap-3 hover:bg-primary/10 transition-colors cursor-pointer"
                       onClick={() => toggleUserSelection(user._id)}
                     >
                       <Checkbox

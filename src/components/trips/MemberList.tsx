@@ -100,13 +100,12 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
                 this trip
               </CardDescription>
             </div>
-            {isCreator && (
-              <AddMemberDialog
-                groupId={trip._id}
-                currentMemberIds={currentMemberIds}
-                onSuccess={onMemberRemoved}
-              />
-            )}
+            <AddMemberDialog
+              groupId={trip._id}
+              currentMemberIds={currentMemberIds}
+              onSuccess={onMemberRemoved}
+              disabled={!isCreator}
+            />
           </div>
         </CardHeader>
         <CardContent>
