@@ -107,14 +107,17 @@ export default function TripDetails() {
       <main className="flex-1 pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-7xl">
           {/* Back Button */}
-          <Button
-            variant="ghost"
-            className="mb-6"
-            onClick={() => navigate('/trips')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Trips
-          </Button>
+          <div className="flex justify-start">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4 -ml-3 text-muted-foreground hover:text-foreground"
+              onClick={() => navigate('/trips')}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to Trips
+            </Button>
+          </div>
 
           {/* Trip Header */}
           <div className="flex items-start justify-between mb-8">

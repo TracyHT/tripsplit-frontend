@@ -89,7 +89,7 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded, onExpen
               <p className="text-sm mt-2">Click "Add Expense" to start tracking expenses for this trip</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
               {expenses.map((expense) => {
                 // Get the first payer from paid_by array
                 const firstPayer = expense.paid_by?.[0];

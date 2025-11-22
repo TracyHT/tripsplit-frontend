@@ -120,7 +120,7 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
               )}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
               {members.map((member) => {
                 const memberData = typeof member === "string" ? null : member;
                 if (!memberData) return null;
