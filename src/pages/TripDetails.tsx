@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Loader2, MoreVertical, Edit2, Trash2, Users, Receipt, DollarSign } from 'lucide-react';
 import { toast } from '@/lib/toast';
@@ -28,16 +29,16 @@ export default function TripDetails() {
   const { data: trip, isLoading, error, refetch } = useGroup(id!);
   const deleteGroup = useDeleteGroup();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
     if (!trip) return;
 
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete "${trip.name}"? This action cannot be undone and will remove all expenses and data associated with this trip.`
-    );
-
-    if (!confirmDelete) return;
-
+    setShowDeleteDialog(false);
     setIsDeleting(true);
     try {
       await deleteGroup.mutateAsync(trip._id);
@@ -143,7 +144,7 @@ export default function TripDetails() {
                       </DropdownMenuItem>
                     </EditTripDialog>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem destructive onClick={handleDelete}>
+                    <DropdownMenuItem destructive onClick={handleDeleteClick}>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete Trip
                     </DropdownMenuItem>
@@ -214,6 +215,17 @@ export default function TripDetails() {
       </main>
 
       <Footer />
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Trip"
+        description={`Are you sure you want to delete "${trip?.name}"? This action cannot be undone and will remove all expenses and data associated with this trip.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

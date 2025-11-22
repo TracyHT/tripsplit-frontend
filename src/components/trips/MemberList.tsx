@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Crown, Trash2 } from "lucide-react";
 import { useRemoveUserFromGroup } from "@/hooks/useApi";
@@ -31,6 +32,7 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
   const { user: currentUser } = useAuth();
   const removeUserFromGroup = useRemoveUserFromGroup();
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
+  const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string } | null>(null);
 
   const members = Array.isArray(trip.user_ids) ? (trip.user_ids as User[]) : [];
   const creatorId =
@@ -40,7 +42,7 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
     typeof m === "string" ? m : m._id
   );
 
-  const handleRemoveMember = async (userId: string, userName: string) => {
+  const handleRemoveClick = (userId: string, userName: string) => {
     if (!isCreator) {
       toast.error("Only the trip creator can remove members");
       return;
@@ -51,20 +53,22 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
       return;
     }
 
-    if (
-      !confirm(`Are you sure you want to remove ${userName} from this trip?`)
-    ) {
-      return;
-    }
+    setMemberToRemove({ id: userId, name: userName });
+  };
 
-    setRemovingUserId(userId);
+  const handleConfirmRemove = async () => {
+    if (!memberToRemove) return;
+
+    setMemberToRemove(null);
+    setRemovingUserId(memberToRemove.id);
+
     try {
       await removeUserFromGroup.mutateAsync({
         groupId: trip._id,
-        userId,
+        userId: memberToRemove.id,
       });
 
-      toast.success(`${userName} removed from trip`);
+      toast.success(`${memberToRemove.name} removed from trip`);
       onMemberRemoved?.();
     } catch (error: any) {
       const message =
@@ -85,114 +89,127 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Members</CardTitle>
-            <CardDescription>
-              {members.length} {members.length === 1 ? "member" : "members"} in
-              this trip
-            </CardDescription>
-          </div>
-          {isCreator && (
-            <AddMemberDialog
-              groupId={trip._id}
-              currentMemberIds={currentMemberIds}
-              onSuccess={onMemberRemoved}
-            />
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        {members.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <p>No members yet</p>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Members</CardTitle>
+              <CardDescription>
+                {members.length} {members.length === 1 ? "member" : "members"} in
+                this trip
+              </CardDescription>
+            </div>
             {isCreator && (
-              <p className="text-sm mt-2">
-                Click "Add Member" to invite people to this trip
-              </p>
+              <AddMemberDialog
+                groupId={trip._id}
+                currentMemberIds={currentMemberIds}
+                onSuccess={onMemberRemoved}
+              />
             )}
           </div>
-        ) : (
-          <div className="space-y-3">
-            {members.map((member) => {
-              const memberData = typeof member === "string" ? null : member;
-              if (!memberData) return null;
+        </CardHeader>
+        <CardContent>
+          {members.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No members yet</p>
+              {isCreator && (
+                <p className="text-sm mt-2">
+                  Click "Add Member" to invite people to this trip
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {members.map((member) => {
+                const memberData = typeof member === "string" ? null : member;
+                if (!memberData) return null;
 
-              const isThisCreator = memberData._id === creatorId;
-              const isCurrentUser = memberData._id === currentUser?._id;
-              const isRemoving = removingUserId === memberData._id;
+                const isThisCreator = memberData._id === creatorId;
+                const isCurrentUser = memberData._id === currentUser?._id;
+                const isRemoving = removingUserId === memberData._id;
 
-              return (
-                <div
-                  key={memberData._id}
-                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
-                >
-                  <Avatar className="h-10 w-10">
-                    {memberData.avatar && (
-                      <AvatarImage
-                        src={memberData.avatar}
-                        alt={memberData.name}
-                      />
-                    )}
-                    <AvatarFallback>
-                      {getInitials(memberData.name)}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium truncate">{memberData.name}</p>
-                      {isThisCreator && (
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          <Crown className="h-3 w-3" />
-                          Creator
-                        </Badge>
+                return (
+                  <div
+                    key={memberData._id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors ${isRemoving ? 'opacity-50' : ''}`}
+                  >
+                    <Avatar className="h-10 w-10">
+                      {memberData.avatar && (
+                        <AvatarImage
+                          src={memberData.avatar}
+                          alt={memberData.name}
+                        />
                       )}
-                      {isCurrentUser && !isThisCreator && (
-                        <Badge variant="outline">You</Badge>
-                      )}
+                      <AvatarFallback>
+                        {getInitials(memberData.name)}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate">{memberData.name}</p>
+                        {isThisCreator && (
+                          <Badge
+                            variant="secondary"
+                            className="flex items-center gap-1"
+                          >
+                            <Crown className="h-3 w-3" />
+                            Creator
+                          </Badge>
+                        )}
+                        {isCurrentUser && !isThisCreator && (
+                          <Badge variant="outline">You</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-left text-muted-foreground truncate">
+                        {memberData.email}
+                      </p>
                     </div>
-                    <p className="text-sm text-left text-muted-foreground truncate">
-                      {memberData.email}
-                    </p>
-                  </div>
 
-                  {isCreator && !isThisCreator && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={isRemoving}
-                          className="h-8 w-8 p-0"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          destructive
-                          onClick={() =>
-                            handleRemoveMember(memberData._id, memberData.name)
-                          }
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Remove from trip
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                    {isCreator && !isThisCreator && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={isRemoving}
+                            className="h-8 w-8 p-0"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            destructive
+                            onClick={() =>
+                              handleRemoveClick(memberData._id, memberData.name)
+                            }
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remove from trip
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <ConfirmDialog
+        open={!!memberToRemove}
+        onOpenChange={(open) => !open && setMemberToRemove(null)}
+        title="Remove Member"
+        description={`Are you sure you want to remove ${memberToRemove?.name} from this trip?`}
+        confirmText="Remove"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={handleConfirmRemove}
+      />
+    </>
   );
 }
