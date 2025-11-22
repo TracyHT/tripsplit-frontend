@@ -58,8 +58,8 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
     }
 
     // Get all member IDs for split
-    const memberIds = (group.members || [])
-      .map((m) => (typeof m === 'string' ? m : m._id))
+    const memberIds = (group.user_ids || [])
+      .map((m: string | { _id: string }) => (typeof m === 'string' ? m : m._id))
       .filter(Boolean);
 
     if (memberIds.length === 0) {
@@ -180,7 +180,7 @@ export default function AddExpenseDialog({ groupId, children, onSuccess }: AddEx
             <div className="rounded-md bg-muted p-3 text-sm">
               <p className="font-medium mb-1">Split Info:</p>
               <p className="text-muted-foreground">
-                This expense will be split equally among all {group?.members?.length || 0} members of the trip.
+                This expense will be split equally among all {group?.user_ids?.length || 0} members of the trip.
               </p>
             </div>
           </div>
