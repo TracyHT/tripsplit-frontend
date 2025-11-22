@@ -132,7 +132,7 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
                 return (
                   <div
                     key={memberData._id}
-                    className={`flex items-center gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors ${isRemoving ? 'opacity-50' : ''}`}
+                    className={`flex items-center gap-3 p-3 rounded-lg border hover:bg-primary/5 hover:border-primary/20 transition-colors ${isRemoving ? 'opacity-50' : ''}`}
                   >
                     <Avatar className="h-10 w-10">
                       {memberData.avatar && (

@@ -9,9 +9,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { Receipt, DollarSign, Calendar, MoreVertical, Trash2, Loader2 } from 'lucide-react';
-import type { Expense, User } from '@/types/api';
+import { Receipt, DollarSign, Calendar, MoreVertical, Trash2, Loader2, Edit2 } from 'lucide-react';
+import type { Expense, User, Group } from '@/types/api';
 import AddExpenseDialog from './AddExpenseDialog';
+import EditExpenseDialog from './EditExpenseDialog';
 import { useDeleteExpense } from '@/hooks/useApi';
 import { groupsApi } from '@/lib/api';
 import { toast } from '@/lib/toast';
@@ -19,14 +20,43 @@ import { toast } from '@/lib/toast';
 interface ExpenseListProps {
   groupId: string;
   expenses: Expense[];
+  group: Group;
   onExpenseAdded?: () => void;
   onExpenseDeleted?: () => void;
+  onExpenseUpdated?: () => void;
 }
 
-export default function ExpenseList({ groupId, expenses, onExpenseAdded, onExpenseDeleted }: ExpenseListProps) {
+export default function ExpenseList({
+  groupId,
+  expenses,
+  group,
+  onExpenseAdded,
+  onExpenseDeleted,
+  onExpenseUpdated,
+}: ExpenseListProps) {
   const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
   const [expenseToDelete, setExpenseToDelete] = useState<{ id: string; description: string } | null>(null);
+  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
   const deleteExpense = useDeleteExpense();
+
+  // Get members from user_ids as User objects
+  const userIdsMembers: User[] = (group?.user_ids || []).filter(
+    (m): m is User => typeof m === 'object' && m !== null && '_id' in m
+  );
+
+  // Get creator (admin) as User object
+  const creator: User | null = group?.admin_id && typeof group.admin_id === 'object' && '_id' in group.admin_id
+    ? group.admin_id as User
+    : null;
+
+  // Combine creator and members, ensuring no duplicates
+  const members: User[] = (() => {
+    const allMembers: User[] = [...userIdsMembers];
+    if (creator && !allMembers.some(m => m._id === creator._id)) {
+      allMembers.unshift(creator);
+    }
+    return allMembers;
+  })();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -40,8 +70,18 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded, onExpen
     }).format(amount);
   };
 
-  const handleDeleteClick = (expenseId: string, expenseDescription: string) => {
+  const handleDeleteClick = (expenseId: string, expenseDescription: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setExpenseToDelete({ id: expenseId, description: expenseDescription });
+  };
+
+  const handleEditClick = (expense: Expense, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpenseToEdit(expense);
+  };
+
+  const handleExpenseClick = (expense: Expense) => {
+    setExpenseToEdit(expense);
   };
 
   const handleConfirmDelete = async () => {
@@ -100,7 +140,8 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded, onExpen
                 return (
                   <div
                     key={expense._id}
-                    className={`flex items-start gap-4 p-4 rounded-lg border hover:bg-accent/50 transition-colors ${isDeleting ? 'opacity-50' : ''}`}
+                    onClick={() => !isDeleting && handleExpenseClick(expense)}
+                    className={`flex items-start gap-4 p-4 rounded-lg border hover:bg-primary/5 hover:border-primary/20 transition-colors cursor-pointer ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
                   >
                     <div className="flex-shrink-0 mt-1">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -109,7 +150,7 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded, onExpen
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="flex items-center justify-between gap-2">
                         <h4 className="font-medium">{expense.description}</h4>
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1 text-lg font-semibold flex-shrink-0">
@@ -118,7 +159,13 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded, onExpen
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={isDeleting}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                                disabled={isDeleting}
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 {isDeleting ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
@@ -128,8 +175,14 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded, onExpen
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
+                                onClick={(e) => handleEditClick(expense, e)}
+                              >
+                                <Edit2 className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
-                                onClick={() => handleDeleteClick(expense._id, expense.description)}
+                                onClick={(e) => handleDeleteClick(expense._id, expense.description, e)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Delete
@@ -172,6 +225,20 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded, onExpen
         variant="destructive"
         onConfirm={handleConfirmDelete}
       />
+
+      {expenseToEdit && (
+        <EditExpenseDialog
+          expense={expenseToEdit}
+          members={members}
+          creator={creator}
+          open={!!expenseToEdit}
+          onOpenChange={(open) => !open && setExpenseToEdit(null)}
+          onSuccess={() => {
+            setExpenseToEdit(null);
+            onExpenseUpdated?.();
+          }}
+        />
+      )}
     </>
   );
 }

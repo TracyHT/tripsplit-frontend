@@ -210,8 +210,10 @@ export default function TripDetails() {
             <ExpenseList
               groupId={trip._id}
               expenses={expenses}
+              group={trip}
               onExpenseAdded={() => refetch()}
               onExpenseDeleted={() => refetch()}
+              onExpenseUpdated={() => refetch()}
             />
           </div>
         </div>
