@@ -152,13 +152,15 @@ export default function ApiTestDashboard() {
   const testCreateSplit = () =>
     runTest("splits-create", "POST /splits", () =>
       splitsApi.createSplit({
+        group_id: "group_id_placeholder",
+        user_id: "user_id_placeholder",
         pay_to: [
-          { user: "user1", amount: 100000 },
-          { user: "user2", amount: 150000 },
+          { user_id: "user1", amount: 100000 },
+          { user_id: "user2", amount: 150000 },
         ],
         get_pay_by: [
-          { user: "user3", amount: 100000 },
-          { user: "user4", amount: 150000 },
+          { user_id: "user3", amount: 100000 },
+          { user_id: "user4", amount: 150000 },
         ],
       })
     );
@@ -167,7 +169,7 @@ export default function ApiTestDashboard() {
     const splitId = "split_id_placeholder";
     return runTest("splits-update", `PUT /splits/${splitId}`, () =>
       splitsApi.updateSplit(splitId, {
-        pay_to: [{ user: "user1", amount: 200000 }],
+        pay_to: [{ user_id: "user1", amount: 200000 }],
       })
     );
   };
