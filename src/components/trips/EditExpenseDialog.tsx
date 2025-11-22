@@ -207,31 +207,33 @@ export default function EditExpenseDialog({
             {/* Participants (Split between) */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Split between *</Label>
+                <Label className={selectedParticipants.length === 0 ? "text-destructive" : ""}>
+                  Split between * {selectedParticipants.length > 0 && `(${selectedParticipants.length})`}
+                </Label>
                 <div className="flex gap-2">
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     className="h-6 px-2 text-xs"
                     onClick={selectAllParticipants}
-                    disabled={updateExpense.isPending}
+                    disabled={updateExpense.isPending || selectedParticipants.length === members.length}
                   >
                     Select All
                   </Button>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     className="h-6 px-2 text-xs"
                     onClick={deselectAllParticipants}
-                    disabled={updateExpense.isPending}
+                    disabled={updateExpense.isPending || selectedParticipants.length === 0}
                   >
                     Deselect All
                   </Button>
                 </div>
               </div>
-              <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto">
+              <div className={`border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto ${selectedParticipants.length === 0 ? "border-destructive" : ""}`}>
                 {members.map((member) => {
                   const isCurrentUser = member._id === user?._id;
                   const isCreatorMember = member._id === creator?._id;

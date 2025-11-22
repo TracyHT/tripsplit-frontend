@@ -112,8 +112,8 @@ const DropdownMenuItem = ({ children, destructive, className, onClick, ...props 
       className={cn(
         "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors w-full text-left",
         destructive
-          ? "text-destructive hover:bg-destructive hover:text-destructive-foreground"
-          : "hover:bg-accent hover:text-accent-foreground",
+          ? "text-destructive hover:bg-destructive/10"
+          : "hover:bg-primary/10",
         className
       )}
       onClick={(e) => {
