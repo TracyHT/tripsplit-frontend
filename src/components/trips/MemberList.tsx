@@ -1,20 +1,26 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { MoreVertical, Crown, Trash2 } from 'lucide-react';
-import { useRemoveUserFromGroup } from '@/hooks/useApi';
-import { toast } from '@/lib/toast';
-import type { User, Group } from '@/types/api';
-import { useAuth } from '@/contexts/AuthContext';
-import AddMemberDialog from './AddMemberDialog';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreVertical, Crown, Trash2 } from "lucide-react";
+import { useRemoveUserFromGroup } from "@/hooks/useApi";
+import { toast } from "@/lib/toast";
+import type { User, Group } from "@/types/api";
+import { useAuth } from "@/contexts/AuthContext";
+import AddMemberDialog from "./AddMemberDialog";
 
 interface MemberListProps {
   trip: Group;
@@ -27,22 +33,27 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
 
   const members = Array.isArray(trip.user_ids) ? (trip.user_ids as User[]) : [];
-  const creatorId = typeof trip.admin_id === 'string' ? trip.admin_id : trip.admin_id._id;
+  const creatorId =
+    typeof trip.admin_id === "string" ? trip.admin_id : trip.admin_id._id;
   const isCreator = currentUser?._id === creatorId;
-  const currentMemberIds = members.map((m) => (typeof m === 'string' ? m : m._id));
+  const currentMemberIds = members.map((m) =>
+    typeof m === "string" ? m : m._id
+  );
 
   const handleRemoveMember = async (userId: string, userName: string) => {
     if (!isCreator) {
-      toast.error('Only the trip creator can remove members');
+      toast.error("Only the trip creator can remove members");
       return;
     }
 
     if (userId === creatorId) {
-      toast.error('Cannot remove the trip creator');
+      toast.error("Cannot remove the trip creator");
       return;
     }
 
-    if (!confirm(`Are you sure you want to remove ${userName} from this trip?`)) {
+    if (
+      !confirm(`Are you sure you want to remove ${userName} from this trip?`)
+    ) {
       return;
     }
 
@@ -56,7 +67,8 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
       toast.success(`${userName} removed from trip`);
       onMemberRemoved?.();
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to remove member';
+      const message =
+        error.response?.data?.message || "Failed to remove member";
       toast.error(message);
     } finally {
       setRemovingUserId(null);
@@ -65,9 +77,9 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
 
   const getInitials = (name: string) => {
     return name
-      .split(' ')
+      .split(" ")
       .map((n) => n[0])
-      .join('')
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
@@ -79,7 +91,8 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
           <div>
             <CardTitle>Members</CardTitle>
             <CardDescription>
-              {members.length} {members.length === 1 ? 'member' : 'members'} in this trip
+              {members.length} {members.length === 1 ? "member" : "members"} in
+              this trip
             </CardDescription>
           </div>
           {isCreator && (
@@ -96,13 +109,15 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
           <div className="text-center py-8 text-muted-foreground">
             <p>No members yet</p>
             {isCreator && (
-              <p className="text-sm mt-2">Click "Add Member" to invite people to this trip</p>
+              <p className="text-sm mt-2">
+                Click "Add Member" to invite people to this trip
+              </p>
             )}
           </div>
         ) : (
           <div className="space-y-3">
             {members.map((member) => {
-              const memberData = typeof member === 'string' ? null : member;
+              const memberData = typeof member === "string" ? null : member;
               if (!memberData) return null;
 
               const isThisCreator = memberData._id === creatorId;
@@ -116,16 +131,24 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
                 >
                   <Avatar className="h-10 w-10">
                     {memberData.avatar && (
-                      <AvatarImage src={memberData.avatar} alt={memberData.name} />
+                      <AvatarImage
+                        src={memberData.avatar}
+                        alt={memberData.name}
+                      />
                     )}
-                    <AvatarFallback>{getInitials(memberData.name)}</AvatarFallback>
+                    <AvatarFallback>
+                      {getInitials(memberData.name)}
+                    </AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-medium truncate">{memberData.name}</p>
                       {isThisCreator && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
                           <Crown className="h-3 w-3" />
                           Creator
                         </Badge>
@@ -134,7 +157,7 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
                         <Badge variant="outline">You</Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-sm text-left text-muted-foreground truncate">
                       {memberData.email}
                     </p>
                   </div>
@@ -154,7 +177,9 @@ export default function MemberList({ trip, onMemberRemoved }: MemberListProps) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           destructive
-                          onClick={() => handleRemoveMember(memberData._id, memberData.name)}
+                          onClick={() =>
+                            handleRemoveMember(memberData._id, memberData.name)
+                          }
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Remove from trip

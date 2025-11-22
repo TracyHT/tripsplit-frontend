@@ -48,8 +48,10 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded }: Expen
         ) : (
           <div className="space-y-3">
             {expenses.map((expense) => {
-              const paidBy = typeof expense.paidBy === 'string' ? null : (expense.paidBy as User);
-              const paidByName = paidBy?.name || 'Unknown';
+              // Get the first payer from paid_by array
+              const firstPayer = expense.paid_by?.[0];
+              const paidByUser = typeof firstPayer === 'object' && firstPayer !== null ? firstPayer as User : null;
+              const paidByName = paidByUser?.name || 'Unknown';
 
               return (
                 <div
@@ -82,7 +84,7 @@ export default function ExpenseList({ groupId, expenses, onExpenseAdded }: Expen
 
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {formatDate(expense.date)}
+                        {formatDate(expense.createdAt)}
                       </div>
                     </div>
                   </div>

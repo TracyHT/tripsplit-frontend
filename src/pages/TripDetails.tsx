@@ -84,9 +84,11 @@ export default function TripDetails() {
   const isCreator = currentUser?._id === creatorId;
   const members = Array.isArray(trip.user_ids) ? trip.user_ids : [];
 
-  // Note: In a real implementation, you would fetch expenses from the backend
-  // For now, we'll show a placeholder
-  const expenses: Expense[] = [];
+  // Get expenses from the populated expenses_ids field
+  // Filter to only include populated expense objects (not string IDs)
+  const expenses: Expense[] = Array.isArray(trip.expenses_ids)
+    ? trip.expenses_ids.filter((e): e is Expense => typeof e === 'object' && e !== null && '_id' in e)
+    : [];
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 

@@ -46,14 +46,15 @@ export const groupsApi = {
   },
 
   // Add expense to group (PUT /groups/:id/expenses)
-  addExpenseToGroup: async (groupId: string, expenseId: string) => {
-    const response = await apiClient.put(`/groups/${groupId}/expenses`, { expenseId });
+  addExpenseToGroup: async (groupId: string, expenseId: string | string[]) => {
+    const expenseIds = Array.isArray(expenseId) ? expenseId : [expenseId];
+    const response = await apiClient.put(`/groups/${groupId}/expenses`, { expense_ids: expenseIds });
     return response.data;
   },
 
   // Remove expense from group (DELETE /groups/:id/expenses)
   removeExpenseFromGroup: async (groupId: string, expenseId: string) => {
-    const response = await apiClient.delete(`/groups/${groupId}/expenses`, { data: { expenseId } });
+    const response = await apiClient.delete(`/groups/${groupId}/expenses`, { data: { expense_id: expenseId } });
     return response.data;
   },
 };
