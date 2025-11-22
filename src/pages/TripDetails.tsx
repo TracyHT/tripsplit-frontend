@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import MemberList from '@/components/trips/MemberList';
 import ExpenseList from '@/components/trips/ExpenseList';
 import EditTripDialog from '@/components/trips/EditTripDialog';
+import SettleUpDialog from '@/components/trips/SettleUpDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -16,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Loader2, MoreVertical, Edit2, Trash2, Users, Receipt, DollarSign } from 'lucide-react';
+import { ArrowLeft, Loader2, MoreVertical, Edit2, Trash2, Users, Receipt, DollarSign, HandCoins } from 'lucide-react';
 import { toast } from '@/lib/toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
@@ -131,7 +132,15 @@ export default function TripDetails() {
               )}
             </div>
 
-            <DropdownMenu>
+            <div className="flex items-center gap-2">
+              <SettleUpDialog groupId={trip._id} groupName={trip.name}>
+                <Button variant="outline" size="sm">
+                  <HandCoins className="h-4 w-4 mr-2" />
+                  Settle Up
+                </Button>
+              </SettleUpDialog>
+
+              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" disabled={isDeleting}>
                   <MoreVertical className="h-4 w-4" />
@@ -160,6 +169,7 @@ export default function TripDetails() {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+            </div>
           </div>
 
           {/* Stats Grid */}

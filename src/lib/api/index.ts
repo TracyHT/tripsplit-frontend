@@ -6,7 +6,7 @@ export { authApi } from "./auth.api";
 export { usersApi } from "./users.api";
 export { groupsApi } from "./groups.api";
 export { expensesApi } from "./expenses.api";
-export { splitsApi } from "./splits.api";
+export { splitsApi, settlementApi } from "./splits.api";
 
 // Legacy function for backward compatibility
 export async function fetchTestMessage() {

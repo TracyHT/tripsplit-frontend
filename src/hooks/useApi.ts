@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { authApi, usersApi, groupsApi, expensesApi, splitsApi } from "@/lib/api";
-import type { User, Group } from "@/types/api";
+import { authApi, usersApi, groupsApi, expensesApi, splitsApi, settlementApi } from "@/lib/api";
+import type { User, Group, Split, UserBalance, SettlementTransaction } from "@/types/api";
 
 // ============ Auth Hooks ============
 
@@ -196,6 +196,9 @@ export function useCreateExpense() {
     }) => expensesApi.createExpense(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      // Invalidate all settlement calculations since expenses changed
+      queryClient.invalidateQueries({ queryKey: ["settlements"] });
     },
   });
 }
@@ -218,6 +221,9 @@ export function useUpdateExpense() {
     }) => expensesApi.updateExpense(expenseId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      // Invalidate all settlement calculations since expenses changed
+      queryClient.invalidateQueries({ queryKey: ["settlements"] });
     },
   });
 }
@@ -229,22 +235,44 @@ export function useDeleteExpense() {
     mutationFn: (expenseId: string) => expensesApi.deleteExpense(expenseId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      // Invalidate all settlement calculations since expenses changed
+      queryClient.invalidateQueries({ queryKey: ["settlements"] });
     },
   });
 }
 
 // ============ Splits Hooks ============
 
+export function useSplitsByGroup(groupId: string) {
+  return useQuery<Split[]>({
+    queryKey: ["splits", "group", groupId],
+    queryFn: () => splitsApi.getSplitsByGroupId(groupId),
+    enabled: !!groupId,
+  });
+}
+
+export function useSplitsByUser(userId: string) {
+  return useQuery<Split[]>({
+    queryKey: ["splits", "user", userId],
+    queryFn: () => splitsApi.getSplitsByUserId(userId),
+    enabled: !!userId,
+  });
+}
+
 export function useCreateSplit() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: {
-      pay_to: Array<{ user: string; amount: number }>;
-      get_pay_by: Array<{ user: string; amount: number }>;
+      group_id: string;
+      user_id: string;
+      pay_to: Array<{ user_id: string; amount: number }>;
+      get_pay_by: Array<{ user_id: string; amount: number }>;
     }) => splitsApi.createSplit(data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["splits"] });
+      queryClient.invalidateQueries({ queryKey: ["splits", "group", variables.group_id] });
     },
   });
 }
@@ -259,8 +287,8 @@ export function useUpdateSplit() {
     }: {
       splitId: string;
       data: {
-        pay_to?: Array<{ user: string; amount: number }>;
-        get_pay_by?: Array<{ user: string; amount: number }>;
+        pay_to?: Array<{ user_id: string; amount: number }>;
+        get_pay_by?: Array<{ user_id: string; amount: number }>;
       };
     }) => splitsApi.updateSplit(splitId, data),
     onSuccess: () => {
@@ -276,7 +304,39 @@ export function useDeleteSplit() {
     mutationFn: (splitId: string) => splitsApi.deleteSplit(splitId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["splits"] });
-      queryClient.invalidateQueries({ queryKey: ["balance"] });
+    },
+  });
+}
+
+// ============ Settlement Hooks ============
+
+export function useBalances(groupId: string) {
+  return useQuery<UserBalance[]>({
+    queryKey: ["settlements", "balances", groupId],
+    queryFn: () => settlementApi.getBalances(groupId),
+    enabled: !!groupId,
+  });
+}
+
+export function useSettlementTransactions(groupId: string) {
+  return useQuery<SettlementTransaction[]>({
+    queryKey: ["settlements", "transactions", groupId],
+    queryFn: () => settlementApi.getSettlementTransactions(groupId),
+    enabled: !!groupId,
+  });
+}
+
+export function useSettleUp() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (groupId: string) => settlementApi.settleUp(groupId),
+    onSuccess: (_, groupId) => {
+      queryClient.invalidateQueries({ queryKey: ["splits"] });
+      queryClient.invalidateQueries({ queryKey: ["splits", "group", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["settlements", "balances", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["settlements", "transactions", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
     },
   });
 }
