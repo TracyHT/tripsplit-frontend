@@ -35,17 +35,43 @@ export interface Expense {
 }
 
 // ============ Split Types ============
+export interface PaymentEntry {
+  user_id: User | string;
+  amount: number;
+}
+
 export interface Split {
   _id: string;
-  expense: Expense | string;
-  user: User | string;
-  amount: number;
-  settled: boolean;
+  group_id: Group | string;
+  user_id: User | string;
+  pay_to: PaymentEntry[];
+  get_pay_by: PaymentEntry[];
   createdAt: string;
   updatedAt: string;
 }
 
 // ============ Balance Types ============
+export interface UserBalance {
+  user_id: string;
+  name: string;
+  email?: string;
+  balance: number;
+}
+
+export interface SettlementTransaction {
+  from: {
+    id: string;
+    name: string;
+    email?: string;
+  };
+  to: {
+    id: string;
+    name: string;
+    email?: string;
+  };
+  amount: number;
+}
+
 export interface Balance {
   userId: string;
   userName: string;

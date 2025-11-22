@@ -187,7 +187,7 @@ export default function Dashboard() {
                 <Button>Create New Trip</Button>
               </CreateTripDialog>
               <Button variant="outline" onClick={() => navigate('/trips')}>View All Trips</Button>
-              <Button variant="outline" disabled>Settle Up</Button>
+              <Button variant="outline" onClick={() => navigate('/trips')}>Settle Up</Button>
             </CardContent>
           </Card>
 
