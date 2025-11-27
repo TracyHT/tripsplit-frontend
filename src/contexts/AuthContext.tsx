@@ -130,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const loginWithGoogle = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://trip-split-eight.vercel.app//api';
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://trip-split-eight.vercel.app/api';
     window.location.href = `${apiUrl.replace('/api', '')}/api/auth/google`;
   };
 
