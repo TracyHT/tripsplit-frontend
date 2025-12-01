@@ -14,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MapPin, Home as HomeIcon, PartyPopper } from "lucide-react";
 
 const Home = () => {
   return (
