@@ -1,174 +1,155 @@
-import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import {
+  Hero,
+  Demo,
+  Features,
+  Mockups,
+  Testimonials,
+  HowItWorks,
+} from "@/components/decorative";
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Users,
-  DollarSign,
-  TrendingUp,
-  Receipt,
-  ArrowRight,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "@/lib/toast";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { MapPin, Home as HomeIcon, PartyPopper } from "lucide-react";
 
 const Home = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      {/* Hero Section */}
-      <div className="relative overflow-hidden pt-16 md:pt-20 mt-4">
-        <div className="absolute inset-0 bg-gradient-hero opacity-10"></div>
-        <div className="container mx-auto px-4 py-20 md:py-32 relative">
-          <div className="max-w-3xl mx-auto text-center animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
-              <Receipt className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">
-                Simple. Fair. Stress-free.
-              </span>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-              Split Bills with Friends, Not Friendships
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Track shared expenses on trips and events. Know who owes what.
-              Settle up easily.
-            </p>
-            <Button
-              size="lg"
-              onClick={() => {
-                toast.info(
-                  "Coming Soon!",
-                  "Dashboard feature is under development"
-                );
-                navigate("/dashboard");
-              }}
-              className="shadow-colored hover:shadow-xl transition-all duration-300 hover:scale-105"
-            >
-              Get Started
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
 
-          {/* Features Grid */}
-          <div
-            id="features"
-            className="grid md:grid-cols-3 gap-6 mt-20 max-w-5xl mx-auto"
-          >
-            <Card className="border-none shadow-soft hover:shadow-colored transition-all duration-300 hover:-translate-y-1">
-              <CardHeader>
-                <Users className="w-10 h-10 text-primary mb-4" />
-                <CardTitle>Group Tracking</CardTitle>
-                <CardDescription>
-                  Add friends, track who paid, and split costs fairly among
-                  everyone.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card className="border-none shadow-soft hover:shadow-colored transition-all duration-300 hover:-translate-y-1">
-              <CardHeader>
-                <DollarSign className="w-10 h-10 text-primary mb-4" />
-                <CardTitle>Smart Calculations</CardTitle>
-                <CardDescription>
-                  Automatically calculate who owes whom with minimal
-                  transactions needed.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card className="border-none shadow-soft hover:shadow-colored transition-all duration-300 hover:-translate-y-1">
-              <CardHeader>
-                <TrendingUp className="w-10 h-10 text-primary mb-4" />
-                <CardTitle>Real-time Balances</CardTitle>
-                <CardDescription>
-                  See balances update instantly as you add expenses. No
-                  surprises.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+      <Hero />
+
+      <section className="py-16 md:py-20 lg:py-24 bg-background relative border-b border-border/50">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
+                10K+
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Expenses Tracked
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
+                500+
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Trips Organized
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
+                2K+
+              </div>
+              <div className="text-sm text-muted-foreground">Active Users</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-2">
+                99%
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Satisfaction Rate
+              </div>
+            </div>
           </div>
         </div>
+      </section>
+
+      <div className="border-b border-border/50">
+        <Features />
       </div>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-lg text-muted-foreground">
-              Three simple steps to split expenses fairly
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
-                1
-              </div>
-              <h3 className="text-xl font-semibold">Create a Trip</h3>
-              <p className="text-muted-foreground">
-                Start by creating a trip and adding all the participants who'll
-                share expenses.
-              </p>
-            </div>
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
-                2
-              </div>
-              <h3 className="text-xl font-semibold">Add Expenses</h3>
-              <p className="text-muted-foreground">
-                Log each expense with who paid and who should split the cost.
-              </p>
-            </div>
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto">
-                3
-              </div>
-              <h3 className="text-xl font-semibold">Settle Up</h3>
-              <p className="text-muted-foreground">
-                View smart settlement suggestions showing who owes whom the
-                minimal amount.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Demo />
 
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <Card className="max-w-3xl mx-auto text-center shadow-colored border-none bg-gradient-primary p-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-              Ready to Split Smarter?
+      <div className="">
+        <HowItWorks />
+      </div>
+
+      <div className="border-b border-border/50">
+        <Mockups />
+      </div>
+
+      <div className="border-b border-border/50">
+        <Testimonials />
+      </div>
+
+      <section className="py-20 md:py-28 lg:py-32 bg-muted/30">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+              Frequently Asked Questions
             </h2>
-            <p className="text-lg text-primary-foreground/90 mb-8">
-              Start tracking your group expenses today
+            <p className="text-base md:text-lg text-muted-foreground">
+              Everything you need to know about TripSplit
             </p>
-            <Button
-              size="lg"
-              variant="secondary"
-              onClick={() => {
-                toast.success(
-                  "Welcome!",
-                  "Let's start splitting expenses together"
-                );
-                // navigate("/dashboard");
-              }}
-              className="shadow-soft"
-            >
-              Get Started Free
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Card>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-6">
+            <Card className="border-none shadow-soft hover:shadow-md transition-all">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  Is TripSplit free to use?
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Yes! TripSplit is completely free to use. Track unlimited
+                  expenses and trips with no hidden fees.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="border-none shadow-soft hover:shadow-md transition-all">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  How does the settlement algorithm work?
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Our smart algorithm calculates the minimum number of
+                  transactions needed to balance everyone's debts, making
+                  settlements simple and efficient.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="border-none shadow-soft hover:shadow-md transition-all">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  Can I use TripSplit offline?
+                </CardTitle>
+                <CardDescription className="text-base">
+                  You need an internet connection to sync data, but you can view
+                  your existing trips and expenses offline.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="border-none shadow-soft hover:shadow-md transition-all">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  How do I invite friends to a trip?
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Simply create a trip and add members by their email or
+                  username. They'll receive a notification to join.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="border-none shadow-soft hover:shadow-md transition-all">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  Is my financial data secure?
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Absolutely. We use industry-standard encryption to protect
+                  your data. We never store payment information or share your
+                  data with third parties.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
       <Footer />
     </div>
   );
