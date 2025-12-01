@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Share2,
-  Users,
-  Calculator,
-  BarChart3,
-  Receipt,
-  Shield,
-} from "lucide-react";
+import { Share2, Users, Calculator, BarChart3, Receipt } from "lucide-react";
 
 const Features: React.FC = () => {
   const features = [
