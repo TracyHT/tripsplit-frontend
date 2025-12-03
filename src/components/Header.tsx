@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Moon, Sun, Receipt, LogOut } from "lucide-react";
+import { Menu, X, Moon, Sun, Receipt, LogOut, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/lib/toast";
@@ -87,49 +87,72 @@ const Header = () => {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors relative group"
-              >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-primary group-hover:w-full transition-all duration-300"></span>
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-all relative",
+                    isActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
           </div>
 
-          <div className="hidden md:flex items-center gap-4">
-            <button
+          <div className="hidden md:flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              className="rounded-lg"
               aria-label="Toggle dark mode"
             >
               {theme === "dark" ? (
-                <Sun className="w-5 h-5 text-foreground" />
+                <Sun className="w-4 h-4" />
               ) : (
-                <Moon className="w-5 h-5 text-foreground" />
+                <Moon className="w-4 h-4" />
               )}
-            </button>
+            </Button>
 
             {isAuthenticated ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate("/profile")}
+                  className="rounded-lg"
+                  title="Profile Settings"
                 >
-                  {user?.name || user?.email}
-                </button>
+                  <Settings className="w-4 h-4" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleLogout}
-                  className="hover:bg-destructive/10 hover:text-destructive"
+                  className="rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                  title="Logout"
                 >
                   <LogOut className="w-4 h-4" />
                 </Button>
-              </div>
+                <div className="h-8 w-px bg-border mx-1" />
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center text-white text-sm font-semibold">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <span className="text-sm font-medium">{user?.name || user?.email}</span>
+                </button>
+              </>
             ) : (
               <>
                 <Button
@@ -139,10 +162,9 @@ const Header = () => {
                 >
                   Sign In
                 </Button>
-
                 <Button
                   onClick={() => navigate("/signup")}
-                  className="shadow-md hover:shadow-lg transition-all"
+                  className="shadow-sm"
                 >
                   Get Started
                 </Button>
@@ -151,64 +173,86 @@ const Header = () => {
           </div>
 
           <div className="flex md:hidden items-center gap-2">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              className="rounded-lg"
               aria-label="Toggle dark mode"
             >
               {theme === "dark" ? (
-                <Sun className="w-5 h-5 text-foreground" />
+                <Sun className="w-4 h-4" />
               ) : (
-                <Moon className="w-5 h-5 text-foreground" />
+                <Moon className="w-4 h-4" />
               )}
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              className="rounded-lg"
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
-                <X className="w-6 h-6 text-foreground" />
+                <X className="w-5 h-5" />
               ) : (
-                <Menu className="w-6 h-6 text-foreground" />
+                <Menu className="w-5 h-5" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
 
         <div
           className={cn(
-            "md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-background/95 backdrop-blur-lg",
-            isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            "md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-background/95 backdrop-blur-lg border-b border-border",
+            isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 border-b-0"
           )}
         >
-          <div className="py-4 space-y-2 border-t border-border">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsMenuOpen(false)}
-                className="block px-4 py-3 rounded-lg text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-muted transition-colors"
-              >
-                {link.name}
-              </Link>
-            ))}
+          <div className="py-4 space-y-1 px-2">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={cn(
+                    "block px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                    isActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
 
-            <div className="pt-4 space-y-2 border-t border-border mt-4">
+            <div className="pt-4 space-y-1 border-t border-border mt-4">
               {isAuthenticated ? (
                 <>
+                  <div className="px-4 py-3 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center text-white font-semibold">
+                      {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user?.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    </div>
+                  </div>
                   <Button
                     variant="ghost"
-                    onClick={() => handleNavClick("/dashboard")}
-                    className="w-full justify-start font-medium"
+                    onClick={() => handleNavClick("/profile")}
+                    className="w-full justify-start font-medium rounded-lg"
                   >
-                    {user?.name || user?.email}
+                    <Settings className="w-4 h-4 mr-2" />
+                    Profile Settings
                   </Button>
                   <Button
                     variant="ghost"
                     onClick={handleLogout}
-                    className="w-full justify-start font-medium text-destructive hover:text-destructive"
+                    className="w-full justify-start font-medium text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Log Out
@@ -219,14 +263,13 @@ const Header = () => {
                   <Button
                     variant="ghost"
                     onClick={() => handleNavClick("/login")}
-                    className="w-full justify-start font-medium"
+                    className="w-full justify-start font-medium rounded-lg"
                   >
                     Log In
                   </Button>
-
                   <Button
                     onClick={() => handleNavClick("/signup")}
-                    className="w-full shadow-md"
+                    className="w-full shadow-sm rounded-lg"
                   >
                     Get Started
                   </Button>

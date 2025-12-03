@@ -12,6 +12,7 @@ import OAuthCallback from "./pages/OAuthCallback";
 import Dashboard from "./pages/Dashboard";
 import Trips from "./pages/Trips";
 import TripDetails from "./pages/TripDetails";
+import ProfileSettings from "./pages/ProfileSettings";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -24,7 +25,15 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/profile" element={<OAuthCallback />} />
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfileSettings />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
